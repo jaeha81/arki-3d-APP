@@ -363,3 +363,14 @@ cd files
 rm -rf node_modules packages/web/node_modules
 npm install
 ```
+
+---
+
+## 📊 개발 현황 <!-- jh-progress -->
+
+| 항목 | 내용 |
+|------|------|
+| **진행률** | `██████████░░░░░░░░░░` **50%** |
+| **레포** | [arki-3d](https://github.com/jaeha81/arki-3d) |
+
+> 진행률: 50%
