@@ -58,6 +58,5 @@ coverage/
 postgres_data/
 minio_data/
 
-# Alembic
-packages/api/migrations/versions/*.py
-!packages/api/migrations/versions/.gitkeep
+# Alembic __pycache__ only
+packages/api/migrations/versions/__pycache__/
