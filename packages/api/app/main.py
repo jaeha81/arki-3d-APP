@@ -15,6 +15,7 @@ from app.api.v1.share import router as share_router
 from app.api.v1.subscriptions import router as subscriptions_router
 from app.api.v1.admin import router as admin_router
 from app.api.v1.price_catalog import router as price_catalog_router
+from app.api.v1.payments import router as payments_router
 from app.middleware.error_handler import http_exception_handler, validation_exception_handler, internal_error_handler
 from app.middleware.logging_middleware import RequestLoggingMiddleware
 
@@ -50,6 +51,7 @@ app.include_router(share_router, prefix="/api/v1")
 app.include_router(subscriptions_router, prefix="/api/v1")
 app.include_router(admin_router, prefix="/api/v1")
 app.include_router(price_catalog_router, prefix="/api/v1")
+app.include_router(payments_router, prefix="/api/v1")
 
 
 @app.get("/health")

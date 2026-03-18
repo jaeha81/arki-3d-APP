@@ -18,7 +18,7 @@ export function TransformGizmo({
 
   return (
     <TransformControls
-      object={target.current}
+      object={target.current as unknown as Parameters<typeof TransformControls>[0]['object']}
       mode={mode}
       size={0.5}
     />

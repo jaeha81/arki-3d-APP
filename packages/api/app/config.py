@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     MINIO_BUCKET: str = "spaceplanner"
     FRONTEND_URL: str = "http://localhost:3000"
     ENVIRONMENT: str = "development"
+    TOSS_CLIENT_KEY: str = "test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq"
+    TOSS_SECRET_KEY: str = "test_sk_zXLkKEypNArWmo50nX3lmeaxYG5R"
 
 
 settings = Settings()

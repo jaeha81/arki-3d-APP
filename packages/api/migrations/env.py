@@ -13,6 +13,7 @@ from app.models import (  # noqa: F401
     estimate,
     project_version,
     subscription,
+    payment,
 )
 
 config = context.config
