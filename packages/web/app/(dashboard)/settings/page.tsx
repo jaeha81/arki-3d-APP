@@ -8,6 +8,7 @@ import {
   usePlans,
   useUpgradePlan,
 } from '@/lib/hooks/use-subscription'
+import { PluginManager } from '@arki/plugin-core'
 
 export default function SettingsPage() {
   const { data: subscription, isLoading: subLoading } = useMySubscription()
@@ -79,6 +80,11 @@ export default function SettingsPage() {
               isLoading={upgradeMutation.isPending}
             />
           ))}
+        </div>
+
+        {/* Plugin Manager */}
+        <div className="mt-12">
+          <PluginManager />
         </div>
       </main>
     </>

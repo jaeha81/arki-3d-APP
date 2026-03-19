@@ -1,183 +1,74 @@
-# Arki-3D — 전면 재설계 계획 v3.0
+# Arki-3D — 전면 재설계 계획 v4.0
 
-> **피벗**: Web SaaS → Android APK (Capacitor) + Plugin 확장 시스템
-> **원칙**: 가볍고 빠르게, 기능 중심, 플러그인으로 확장
+> **핵심 전환**: 무거운 웹앱 → 경량 APK + 플러그인 확장팩 시스템
+> **원칙**: 가볍고 빠르게, 핵심 기능만, 플러그인으로 확장
 > **날짜**: 2026-03-19
 
 ---
 
-## 1. 아키텍처 개요
+## 1. 설계 철학
+
+### 5대 성능 원칙
+
+| # | 원칙 | 적용 |
+|---|------|------|
+| 1 | 불필요한 이미지/애니메이션 배제 | Lottie/Framer 제거, CSS transition만 150ms, 장식용 이미지 없음 |
+| 2 | 필수 데이터만 비동기 + 캐시 | TanStack Query staleTime 5분, gcTime 30분, cursor 페이지네이션 |
+| 3 | 스켈레톤 UI + 프리패칭 | Suspense fallback, 호버 시 prefetch, 에디터 진입 시 에셋 prefetch |
+| 4 | 전송/DOM 최소화 | patch 방식 업데이트, 가상 리스트, 비필수 라이브러리 배제 |
+| 5 | 비동기 핵심 분리 | Canvas 동기, AI/3D 비동기, 플러그인 동적 import + Suspense |
+
+### 핵심 설계 결정
+
+- **APK 우선**: Capacitor로 정적 빌드 → APK 배포
+- **경량 코어**: 코어 앱은 2D/3D 에디터 + 인증 + 프로젝트 관리만
+- **플러그인 확장**: AI, 견적, PDF, 가구 등은 모두 플러그인
+- **설치 후 확장**: 사용자가 필요한 기능만 플러그인으로 추가
+- **GitHub 동시 저장**: 플러그인 코드도 같은 리포에 packages/plugins/에 저장
+
+---
+
+## 2. 아키텍처
 
 ```
 arki-3d/
 ├── packages/
-│   ├── web/              # React + Vite or Next.js static export → APK (Capacitor)
-│   ├── api/              # FastAPI 백엔드 (클라우드) ← 유지
-│   ├── engine/           # 순수 TS 2D/3D 엔진 ← 유지
-│   └── plugins/          # 플러그인 패키지 모음 ← 신규
-│       ├── core/         # 플러그인 베이스 타입 + 레지스트리 + 로더
-│       ├── ai-design/    # AI 디자인 어시스턴트 플러그인
-│       ├── estimation/   # 자동 견적 플러그인
-│       ├── furniture-lib/# 가구 라이브러리 플러그인
-│       └── pdf-export/   # PDF 내보내기 플러그인
-├── capacitor.config.ts   # Capacitor APK 설정 ← 신규
-├── android/              # Android 네이티브 프로젝트 ← 신규
-└── docs/
-    └── plugin-api.md     # 플러그인 개발 가이드
+│   ├── web/                  # Next.js static export → APK (Capacitor)
+│   │   ├── app/              # 경량 라우트 (auth, dashboard, editor)
+│   │   ├── components/       # 최소 UI 컴포넌트
+│   │   └── lib/              # fetch API 클라이언트 + Zustand + TanStack Query
+│   ├── api/                  # FastAPI 백엔드 (클라우드) ← 유지
+│   ├── engine/               # 순수 TS 2D/3D 엔진 ← 유지
+│   └── plugins/              # 플러그인 시스템 (GitHub에 같이 저장)
+│       ├── core/             # 플러그인 프레임워크
+│       │   ├── types.ts      # PluginBase, PluginManifest, PluginContext
+│       │   ├── registry.ts   # 전역 플러그인 레지스트리
+│       │   ├── loader.ts     # 동적 import 로더 + 샌드박스
+│       │   ├── store.ts      # Zustand 플러그인 상태 + Capacitor Preferences 영속화
+│       │   ├── lifecycle.ts  # 플러그인 라이프사이클 관리자 (신규)
+│       │   └── manager-ui.tsx # 플러그인 매니저 UI
+│       ├── ai-design/        # AI 디자인 어시스턴트 플러그인
+│       ├── estimation/       # 자동 견적 플러그인
+│       ├── pdf-export/       # PDF 내보내기 플러그인
+│       └── furniture-lib/    # 가구 라이브러리 플러그인
+├── capacitor.config.ts       # APK 설정
+└── android/                  # Android 네이티브 프로젝트
 ```
 
 ---
 
-## 2. 기술 스택 (변경 사항)
+## 3. 플러그인 시스템 설계
 
-| 레이어             | 이전     | 변경 후                                 | 이유              |
-| ------------------ | -------- | --------------------------------------- | ----------------- |
-| **배포 형태**      | Web SaaS | Android APK                             | 사용자 설치형 앱  |
-| **패키징**         | Vercel   | Capacitor + Android Studio              | APK 빌드          |
-| **Next.js 설정**   | SSR      | static export (`output: 'export'`)      | APK는 서버 불필요 |
-| **플러그인**       | 없음     | packages/plugins/ + 동적 import         | 기능 확장성       |
-| **캐싱**           | 없음     | TanStack Query staleTime + localStorage | 반복 로딩 최소화  |
-| **로딩**           | 없음     | Skeleton UI + Suspense                  | 즉각 반응         |
-| **API 클라이언트** | axios    | fetch + AbortController                 | 경량화            |
-
-**유지:**
-
-- FastAPI 백엔드 (클라우드 API)
-- packages/engine (순수 TypeScript)
-- Zustand 상태 관리
-- TanStack Query (캐싱 전략 추가)
-
----
-
-## 3. 5가지 성능 원칙 적용
-
-### 3-1. 불필요한 이미지/애니메이션 배제
-
-- Lottie, Framer Motion 등 애니메이션 라이브러리 미사용
-- CSS transition만 사용 (150ms ease-out)
-- 장식용 이미지 제거, 아이콘은 Lucide (SVG) 유지
-
-### 3-2. 필수 데이터만 비동기 + 캐시
-
-- TanStack Query `staleTime: 5 * 60 * 1000` (5분)
-- `gcTime: 30 * 60 * 1000` (30분)
-- 프로젝트 목록: 페이지네이션 + cursor 기반
-- 에셋 카탈로그: 무한 스크롤 + 카테고리별 분리 캐시
-
-### 3-3. 스켈레톤 UI + 프리패칭
-
-- React Suspense + fallback skeleton 컴포넌트
-- 프로젝트 카드 호버 시 에디터 데이터 prefetch
-- 에디터 진입 시 에셋 카탈로그 prefetch
-
-### 3-4. 전송 데이터 최소화 + DOM 조작 최소화
-
-- scene_data JSONB: 변경된 요소만 patch (full replace 금지)
-- API 응답: 필요 필드만 select (GraphQL-like fields 파라미터)
-- Virtual list for asset catalog (react-window 또는 자체 구현)
-- DOM 조작: React 배치 업데이트 활용, useTransition
-
-### 3-5. 비동기 핵심 기능 분리
-
-- 에디터 Canvas: 동기 (즉각 반응)
-- AI 챗봇: 비동기 (SSE 스트리밍)
-- 3D 씬 업데이트: `requestAnimationFrame` 배치
-- 플러그인 로딩: 동적 import + Suspense
-
----
-
-## 4. Capacitor APK 구성
-
-### 4-1. 설치
-
-```bash
-npm install @capacitor/core @capacitor/cli @capacitor/android
-npx cap init
-npx cap add android
-```
-
-### 4-2. capacitor.config.ts
-
-```typescript
-import { CapacitorConfig } from '@capacitor/cli'
-
-const config: CapacitorConfig = {
-  appId: 'com.arki.spaceplanner',
-  appName: 'Arki-3D',
-  webDir: 'packages/web/out', // Next.js static export 출력
-  server: {
-    androidScheme: 'https',
-    cleartext: false,
-  },
-  android: {
-    buildOptions: {
-      keystorePath: 'android/keystore.jks',
-      releaseType: 'APK',
-    },
-  },
-  plugins: {
-    SplashScreen: { launchShowDuration: 0 }, // 스플래시 없애기 (경량화)
-  },
-}
-
-export default config
-```
-
-### 4-3. Next.js static export
-
-```typescript
-// next.config.ts
-const config: NextConfig = {
-  output: 'export', // 정적 HTML/JS 출력
-  trailingSlash: true,
-  images: { unoptimized: true },
-}
-```
-
-### 4-4. APK 빌드 흐름
-
-```bash
-# 1. 웹앱 빌드
-cd packages/web && npm run build   # → out/ 생성
-
-# 2. Capacitor 동기화
-npx cap copy android
-npx cap sync android
-
-# 3. APK 빌드 (Android Studio 또는 CLI)
-npx cap build android --prod       # → APK 파일 생성
-```
-
----
-
-## 5. 플러그인 시스템 설계
-
-### 5-1. 플러그인 구조
+### 3-1. 라이프사이클
 
 ```
-packages/plugins/
-├── core/
-│   ├── package.json
-│   ├── src/
-│   │   ├── types.ts          # PluginManifest, PluginBase 인터페이스
-│   │   ├── registry.ts       # PluginRegistry (등록/조회)
-│   │   ├── loader.ts         # PluginLoader (동적 import)
-│   │   ├── store.ts          # Zustand plugin store
-│   │   └── index.ts
-│   └── tsconfig.json
-├── ai-design/
-│   ├── plugin.json           # 플러그인 매니페스트
-│   ├── package.json
-│   └── src/
-│       ├── index.ts          # 플러그인 진입점
-│       ├── AiDesignPanel.tsx # UI 패널
-│       └── ai-service.ts     # Claude API 호출
-├── estimation/
-├── furniture-lib/
-└── pdf-export/
+Registry에 등록 → 사용자 설치 → activate() → 사용 중 → deactivate() → 제거
+                                    ↓
+                            PluginContext 주입
+                            (scene, api, ui)
 ```
 
-### 5-2. 플러그인 매니페스트 (plugin.json)
+### 3-2. 플러그인 매니페스트 (plugin.json)
 
 ```json
 {
@@ -185,8 +76,7 @@ packages/plugins/
   "name": "AI 디자인 어시스턴트",
   "version": "1.0.0",
   "description": "Claude AI로 공간 디자인 자동 제안",
-  "author": "Arki Team",
-  "capabilities": ["panel", "ai-agent", "tool"],
+  "capabilities": ["panel", "ai-agent"],
   "entry": "./src/index.ts",
   "minAppVersion": "1.0.0",
   "icon": "sparkles",
@@ -194,174 +84,114 @@ packages/plugins/
 }
 ```
 
-### 5-3. 플러그인 베이스 인터페이스 (packages/plugins/core/src/types.ts)
+### 3-3. PluginContext API
+
+| API | 메서드 | 설명 |
+|-----|--------|------|
+| `scene` | `getFloorPlan()`, `updateFloorPlan(patch)`, `getFurniture()`, `addFurniture()` | 씬 읽기/쓰기 |
+| `api` | `get(path)`, `post(path, body)` | FastAPI 클라이언트 |
+| `ui` | `registerPanel()`, `unregisterPanel()`, `showToast()` | UI 등록/알림 |
+
+### 3-4. 제공 플러그인 (GitHub에 함께 저장)
+
+| 플러그인 | 기능 | 타입 | 기본 번들 |
+|----------|------|------|-----------|
+| `ai-design` | Claude AI 디자인 제안 + 스트리밍 채팅 | panel, ai-agent | O |
+| `estimation` | 자재+시공비 자동 견적, 비용 요약 | panel | O |
+| `pdf-export` | 견적서+도면 PDF 내보내기 | export | O |
+| `furniture-lib` | 3D 가구 카탈로그 검색/배치 | asset-provider, panel | O |
+
+### 3-5. 플러그인 영속화 전략
+
+- **설치 상태**: Capacitor Preferences (네이티브) / localStorage (웹)
+- **활성화 상태**: 앱 시작 시 자동 복원
+- **레지스트리**: packages/plugins/registry.json (GitHub 저장)
+
+---
+
+## 4. 성능 최적화 전략
+
+### 4-1. TanStack Query 캐싱
 
 ```typescript
-export interface PluginManifest {
-  id: string
-  name: string
-  version: string
-  description: string
-  capabilities: PluginCapability[]
-  entry: string
-  minAppVersion: string
-  icon?: string
-  permissions: string[]
-}
-
-export type PluginCapability = 'panel' | 'tool' | 'ai-agent' | 'export' | 'asset-provider'
-
-export interface PluginContext {
-  scene: SceneAPI // 씬 읽기/쓰기
-  api: ApiClient // FastAPI 클라이언트
-  ui: UiAPI // 패널/다이얼로그 등록
-  store: StoreAPI // Zustand 스토어 접근
-}
-
-export abstract class PluginBase {
-  abstract manifest: PluginManifest
-  abstract activate(ctx: PluginContext): Promise<void>
-  abstract deactivate(): Promise<void>
-}
+// QueryProvider 기본 설정
+staleTime: 5 * 60 * 1000    // 5분간 fresh → 재요청 안 함
+gcTime: 30 * 60 * 1000      // 30분 가비지 컬렉션
+retry: 1                     // 실패 시 1회만 재시도
+refetchOnWindowFocus: false  // APK에서는 불필요
 ```
 
-### 5-4. 플러그인 레지스트리 (GitHub)
+### 4-2. 스켈레톤 UI
 
-- `packages/plugins/registry.json`: 사용 가능한 플러그인 목록
-- 앱 내 Plugin Manager에서 목록 조회/설치
-- 설치된 플러그인: localStorage + Capacitor Preferences 저장
-- 플러그인 코드: CDN (jsDelivr via GitHub) 또는 번들 내 포함
+- `SkeletonProjectCard` — 대시보드 프로젝트 목록
+- `SkeletonEditorPanel` — 에디터 사이드패널
+- `SkeletonAssetCard` — 가구 에셋 카드
+- `PluginCardSkeleton` — 플러그인 카드 (이미 구현됨)
 
-### 5-5. 초기 제공 플러그인 (번들 포함)
+### 4-3. 프리패칭
 
-| 플러그인        | 기능                    | 기본 활성화 |
-| --------------- | ----------------------- | ----------- |
-| `ai-design`     | Claude AI 디자인 제안   | ✅          |
-| `estimation`    | 자재+시공비 자동 견적   | ✅          |
-| `pdf-export`    | 견적서 PDF 생성         | ✅          |
-| `furniture-lib` | 3D 가구 라이브러리 확장 | ✅          |
+- 프로젝트 카드 호버 → 에디터 데이터 prefetchQuery
+- 에디터 로드 시 → 에셋/자재 카탈로그 prefetch
+- 플러그인 목록 로드 시 → 설치된 플러그인 사전 로딩
+
+### 4-4. 코드 스플리팅
+
+- 에디터 → `dynamic(() => import('./EditorLayout'))`, `ssr: false`
+- 3D 뷰어 → `dynamic(() => import('./ThreeViewer3D'))`, `ssr: false`
+- 플러그인 → 각각 `loadBuiltinPlugin()` 동적 import
+
+### 4-5. 라이브러리 경량화
+
+- ~~axios~~ → fetch API (이미 적용됨)
+- ~~Framer Motion~~ → CSS transition only
+- ~~Lottie~~ → 미사용
+- 아이콘: Lucide (tree-shakeable SVG) 유지
 
 ---
 
-## 6. 구현 우선순위
+## 5. 구현 체크리스트
 
-### Phase 1 — APK 기반 구축 (이번 스프린트)
+### Phase 1 — 플러그인 코어 강화 [x]
 
-- [x] 기존 코드 현황 파악
-- [ ] Next.js static export 설정 (`output: 'export'`)
-- [ ] Capacitor 설치 + `capacitor.config.ts`
-- [ ] Android 프로젝트 초기화 (`npx cap add android`)
-- [ ] APK 빌드 확인
+- [x] `lifecycle.ts` — 플러그인 라이프사이클 매니저 (init → activate → deactivate)
+- [x] `store.ts` — Capacitor Preferences 영속화 추가
+- [x] `loader.ts` — 에러 핸들링 + 타임아웃 강화
+- [x] `manager-ui.tsx` — 설치/제거 버튼 + 스토어 연동 강화
 
-### Phase 2 — 플러그인 시스템 (병렬)
+### Phase 2 — 4개 플러그인 구현 (병렬) [x]
 
-- [ ] `packages/plugins/core` 베이스 타입 + 레지스트리 구현
-- [ ] `PluginManager` UI 컴포넌트
-- [ ] `packages/plugins/ai-design` 구현
-- [ ] `packages/plugins/estimation` 구현
-- [ ] `packages/plugins/pdf-export` 구현
-- [ ] `packages/plugins/furniture-lib` 구현
-- [ ] `plugin-registry.json` 생성
+- [x] `ai-design` — index.ts 진입점 + AiDesignPanel.tsx
+- [x] `estimation` — index.ts + EstimationPanel.tsx + 비용 계산
+- [x] `pdf-export` — index.ts + PDF 생성 트리거
+- [x] `furniture-lib` — index.ts + FurniturePanel.tsx + 에셋 검색
 
-### Phase 3 — 성능 최적화 (병렬)
+### Phase 3 — 성능 최적화 [x]
 
-- [ ] Skeleton UI 컴포넌트 (`SkeletonProjectCard`, `SkeletonEditorPanel`)
-- [ ] TanStack Query 캐싱 전략 적용 (`staleTime`, `gcTime`)
-- [ ] Route-based code splitting (동적 import)
-- [ ] Asset catalog virtual list
-- [ ] API 클라이언트 경량화 (axios → fetch)
-- [ ] 이미지/애니메이션 불필요 요소 제거
+- [x] QueryProvider 캐싱 전략 강화 (staleTime 5분, gcTime 30분)
+- [x] 스켈레톤 UI 컴포넌트 추가 (SkeletonProjectCard, SkeletonEditorPanel)
+- [x] 에디터 prefetch 훅 추가
+- [x] 플러그인 동적 로딩 Suspense 래퍼
 
-### Phase 4 — 완성
+### Phase 4 — 앱 통합 [x]
 
-- [ ] `plugin-api.md` 문서화
-- [ ] APK 서명 + 빌드 자동화
-- [ ] GitHub Actions: 빌드 + APK 아티팩트
+- [x] 에디터 페이지에 플러그인 시스템 연결
+- [x] 설정 페이지에 플러그인 매니저 추가
+- [x] 플러그인 설치 상태 앱 시작 시 자동 복원
 
 ---
 
-## 7. API 클라이언트 경량화
+## 6. 기술 스택 (최종)
 
-### 기존 (axios, 100KB+)
-
-```typescript
-import axios from 'axios'
-const client = axios.create({ baseURL: API_URL })
-```
-
-### 변경 (fetch, 0KB)
-
-```typescript
-// lib/api/client.ts
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
-
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const token = useAuthStore.getState().token
-  const res = await fetch(`${BASE_URL}${path}`, {
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...init?.headers,
-    },
-  })
-  if (!res.ok) throw new ApiError(res.status, await res.json())
-  return res.json()
-}
-
-export const api = {
-  get: <T>(path: string) => request<T>(path),
-  post: <T>(path: string, body: unknown) =>
-    request<T>(path, { method: 'POST', body: JSON.stringify(body) }),
-  patch: <T>(path: string, body: unknown) =>
-    request<T>(path, { method: 'PATCH', body: JSON.stringify(body) }),
-  delete: (path: string) => request(path, { method: 'DELETE' }),
-}
-```
-
----
-
-## 8. 스켈레톤 UI 전략
-
-```tsx
-// components/ui/skeleton.tsx (이미 존재 → 활용)
-// components/dashboard/SkeletonProjectCard.tsx
-export function SkeletonProjectCard() {
-  return (
-    <div className="rounded-lg border p-4 space-y-3 animate-pulse">
-      <div className="h-32 bg-muted rounded-md" />
-      <div className="h-4 bg-muted rounded w-3/4" />
-      <div className="h-3 bg-muted rounded w-1/2" />
-    </div>
-  )
-}
-
-// components/editor/SkeletonEditorPanel.tsx
-// components/editor/SkeletonAssetCard.tsx
-```
-
-React Suspense 적용:
-
-```tsx
-<Suspense fallback={<SkeletonProjectCard />}>
-  <ProjectGrid />
-</Suspense>
-```
-
----
-
-## 9. 개발 규칙 (변경/추가)
-
-| 항목                | 규칙                               |
-| ------------------- | ---------------------------------- |
-| 배포 형태           | APK (Capacitor)                    |
-| 애니메이션          | CSS transition만 (150ms ease-out)  |
-| HTTP 클라이언트     | fetch API (axios 제거)             |
-| 이미지              | 기능 관련만 (장식용 제거)          |
-| 플러그인            | PluginBase 상속 필수               |
-| 플러그인 매니페스트 | plugin.json 필수                   |
-| 코드 분할           | 에디터/플러그인 → 동적 import      |
-| 캐싱                | TanStack Query staleTime 명시 필수 |
+| 레이어 | 기술 | 비고 |
+|--------|------|------|
+| 배포 형태 | APK (Capacitor) | 다운로드+설치 |
+| 프론트엔드 | Next.js 14+ static export | `output: 'export'` |
+| UI | Tailwind CSS + shadcn/ui | CSS transition only |
+| 상태 | Zustand + TanStack Query | 캐시 5분/30분 |
+| 3D | Three.js + R3F | 동적 로딩 |
+| 플러그인 | @arki/plugin-core | PluginBase 상속 |
+| 백엔드 | FastAPI (클라우드) | 유지 |
+| DB | PostgreSQL + Redis | 유지 |
 
 ---
 

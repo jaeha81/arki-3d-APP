@@ -28,3 +28,5 @@ export { PluginLoadError, loadPlugin, loadBuiltinPlugin } from './loader'
 export { usePluginStore } from './store'
 
 export { PluginManager } from './manager-ui'
+
+export { PluginLifecycleManager, pluginLifecycle } from './lifecycle'
