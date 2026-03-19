@@ -6,8 +6,9 @@ export function useMaterials(category?: string) {
   return useQuery<Material[]>({
     queryKey: ['materials', category],
     queryFn: async () => {
-      const res = await apiClient.get('/materials', { params: { category } })
-      return res.data.data
+      const q = category ? `?category=${encodeURIComponent(category)}` : ''
+      const res = await apiClient.get<{ data: Material[] }>(`/materials${q}`)
+      return res.data
     },
     staleTime: 1000 * 60 * 10,
   })

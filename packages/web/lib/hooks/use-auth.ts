@@ -4,7 +4,7 @@ import { useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { apiClient } from '@/lib/api/client'
 import { useAuthStore } from '@/lib/stores/auth-store'
-import type { User, ApiResponse } from '@/types'
+import type { User } from '@/types'
 
 interface LoginPayload {
   email: string
@@ -28,8 +28,8 @@ export function useAuth() {
 
   const login = useCallback(
     async (payload: LoginPayload) => {
-      const { data } = await apiClient.post<ApiResponse<AuthResponse>>('/auth/login', payload)
-      setAuth(data.data.user, data.data.accessToken)
+      const res = await apiClient.post<{ data: AuthResponse }>('/auth/login', payload)
+      setAuth(res.data.user, res.data.accessToken)
       router.push('/projects')
     },
     [setAuth, router]
@@ -37,7 +37,7 @@ export function useAuth() {
 
   const register = useCallback(
     async (payload: RegisterPayload) => {
-      await apiClient.post<ApiResponse<User>>('/auth/register', payload)
+      await apiClient.post<{ data: User }>('/auth/register', payload)
       router.push('/login')
     },
     [router]
@@ -49,12 +49,12 @@ export function useAuth() {
   }, [clearAuth, router])
 
   const fetchMe = useCallback(async () => {
-    const { data } = await apiClient.get<ApiResponse<User>>('/auth/me')
+    const res = await apiClient.get<{ data: User }>('/auth/me')
     const token = useAuthStore.getState().token
     if (token) {
-      setAuth(data.data, token)
+      setAuth(res.data, token)
     }
-    return data.data
+    return res.data
   }, [setAuth])
 
   return { user, isAuthenticated, login, register, logout, fetchMe }

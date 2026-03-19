@@ -11,7 +11,7 @@ export async function storeGet<T>(key: string): Promise<T | null> {
   if (isTauri()) {
     try {
       const { load } = await import('@tauri-apps/plugin-store')
-      const store = await load('settings.json', { autoSave: true })
+      const store = await load('settings.json')
       return (await store.get<T>(key)) ?? null
     } catch {
       return null
@@ -29,8 +29,9 @@ export async function storeSet<T>(key: string, value: T): Promise<void> {
   if (isTauri()) {
     try {
       const { load } = await import('@tauri-apps/plugin-store')
-      const store = await load('settings.json', { autoSave: true })
+      const store = await load('settings.json')
       await store.set(key, value)
+      await store.save()
       return
     } catch {
       // fallthrough to localStorage
@@ -43,8 +44,9 @@ export async function storeDelete(key: string): Promise<void> {
   if (isTauri()) {
     try {
       const { load } = await import('@tauri-apps/plugin-store')
-      const store = await load('settings.json', { autoSave: true })
+      const store = await load('settings.json')
       await store.delete(key)
+      await store.save()
       return
     } catch {}
   }
