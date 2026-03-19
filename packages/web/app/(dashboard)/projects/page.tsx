@@ -1,14 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader'
 import { ProjectGrid } from '@/components/dashboard/ProjectGrid'
 import { CreateProjectDialog } from '@/components/dashboard/CreateProjectDialog'
 import { Button } from '@/components/ui/button'
+import { ProjectGridSkeleton } from '@/components/ui/loading-skeleton'
 import { useProjects } from '@/lib/hooks/use-projects'
 
-export default function ProjectsPage() {
+function ProjectsContent() {
   const [createOpen, setCreateOpen] = useState(false)
   const { projectsQuery, deleteProject } = useProjects()
 
@@ -16,7 +17,6 @@ export default function ProjectsPage() {
 
   return (
     <>
-      <DashboardHeader />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6 flex items-center justify-between">
           <div>
@@ -38,6 +38,17 @@ export default function ProjectsPage() {
         />
       </main>
       <CreateProjectDialog open={createOpen} onOpenChange={setCreateOpen} />
+    </>
+  )
+}
+
+export default function ProjectsPage() {
+  return (
+    <>
+      <DashboardHeader />
+      <Suspense fallback={<ProjectGridSkeleton count={8} />}>
+        <ProjectsContent />
+      </Suspense>
     </>
   )
 }
