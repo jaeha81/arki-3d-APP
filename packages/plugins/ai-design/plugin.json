@@ -1,0 +1,12 @@
+{
+  "id": "ai-design",
+  "name": "AI 디자인 어시스턴트",
+  "version": "1.0.0",
+  "description": "Claude AI로 공간 디자인 자동 제안",
+  "author": "Arki Team",
+  "capabilities": ["panel", "ai-agent"],
+  "entry": "./src/index.ts",
+  "minAppVersion": "1.0.0",
+  "icon": "sparkles",
+  "permissions": ["api:chat", "scene:write"]
+}
