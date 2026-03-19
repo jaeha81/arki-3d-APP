@@ -1,0 +1,12 @@
+{
+  "id": "estimation",
+  "name": "자동 견적",
+  "version": "1.0.0",
+  "description": "자재+시공비 자동 견적 산출",
+  "author": "Arki Team",
+  "capabilities": ["panel"],
+  "entry": "./src/index.ts",
+  "minAppVersion": "0.1.0",
+  "icon": "calculator",
+  "permissions": ["api:estimate", "scene:read"]
+}

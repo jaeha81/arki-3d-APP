@@ -1,0 +1,12 @@
+{
+  "name": "@arki/plugin-pdf-export",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@arki/plugin-core": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "id": "furniture-lib",
+  "name": "가구 라이브러리",
+  "version": "1.0.0",
+  "description": "3D 가구 에셋 확장 카탈로그",
+  "author": "Arki Team",
+  "capabilities": ["asset-provider", "panel"],
+  "entry": "./src/index.ts",
+  "minAppVersion": "0.1.0",
+  "icon": "sofa",
+  "permissions": ["api:asset", "scene:write"]
+}

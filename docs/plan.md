@@ -1,8 +1,10 @@
-# Arki-3D — 전면 재설계 계획 v3.0
+# Arki-3D — 전면 재설계 계획 v4.0
 
-> **피벗**: Web SaaS → Android APK (Capacitor) + Plugin 확장 시스템
+> **피벗**: Web SaaS → **데스크탑 설치형 앱 (Tauri v2)** + Plugin 확장 시스템
 > **원칙**: 가볍고 빠르게, 기능 중심, 플러그인으로 확장
+> **이전 피벗**: Web SaaS → Android APK (Capacitor) → **데스크탑 (Tauri)** 로 최종 변경
 > **날짜**: 2026-03-19
+> **이유**: 사용자가 다운로드 받아 설치하는 데스크탑 앱, Tauri = 경량(~10MB), 크로스플랫폼 (.msi/.dmg/.AppImage)
 
 ---
 
@@ -245,38 +247,43 @@ export abstract class PluginBase {
 
 ## 6. 구현 우선순위
 
-### Phase 1 — APK 기반 구축 (이번 스프린트)
+### Phase 1 — 데스크탑 앱 기반 구축 ✅ 완료
 
 - [x] 기존 코드 현황 파악
-- [ ] Next.js static export 설정 (`output: 'export'`)
-- [ ] Capacitor 설치 + `capacitor.config.ts`
-- [ ] Android 프로젝트 초기화 (`npx cap add android`)
-- [ ] APK 빌드 확인
+- [x] Next.js static export 설정 (`output: 'export'`, `reactStrictMode: false`)
+- [x] **Tauri v2** 설치 + `src-tauri/tauri.conf.json` (Capacitor 대체)
+- [x] `src-tauri/src/lib.rs` — SQLite 마이그레이션 + WebGL GPU 플래그
+- [x] `src-tauri/Cargo.toml` — 8개 Tauri 플러그인 (sql, fs, store, dialog, notification, updater, process, shell)
+- [x] `src-tauri/capabilities/default.json` — 권한 설정
+- [x] root `package.json` — Tauri 스크립트, Capacitor 제거
+- [x] `packages/web/package.json` — Tauri API 패키지 추가, axios/Capacitor 제거
 
-### Phase 2 — 플러그인 시스템 (병렬)
+### Phase 2 — 플러그인 시스템 ✅ 완료
 
-- [ ] `packages/plugins/core` 베이스 타입 + 레지스트리 구현
-- [ ] `PluginManager` UI 컴포넌트
-- [ ] `packages/plugins/ai-design` 구현
-- [ ] `packages/plugins/estimation` 구현
-- [ ] `packages/plugins/pdf-export` 구현
-- [ ] `packages/plugins/furniture-lib` 구현
-- [ ] `plugin-registry.json` 생성
+- [x] `packages/plugins/core` 베이스 타입 + 레지스트리 구현
+- [x] `PluginManager` UI 컴포넌트 (manager-ui.tsx)
+- [x] `packages/plugins/ai-design` 완전 구현 (AiDesignPanel + 스트리밍 채팅)
+- [x] `packages/plugins/estimation` 완전 구현 (한국 단가표 + 자동 견적)
+- [x] `packages/plugins/pdf-export` 완전 구현 (HTML→PDF 인쇄)
+- [x] `packages/plugins/furniture-lib` 완전 구현 (18종 가구 카탈로그)
+- [x] `packages/plugins/registry.json` 완성
 
-### Phase 3 — 성능 최적화 (병렬)
+### Phase 3 — 성능 최적화 ✅ 완료
 
-- [ ] Skeleton UI 컴포넌트 (`SkeletonProjectCard`, `SkeletonEditorPanel`)
-- [ ] TanStack Query 캐싱 전략 적용 (`staleTime`, `gcTime`)
-- [ ] Route-based code splitting (동적 import)
-- [ ] Asset catalog virtual list
-- [ ] API 클라이언트 경량화 (axios → fetch)
-- [ ] 이미지/애니메이션 불필요 요소 제거
+- [x] Skeleton UI 컴포넌트 (`SkeletonProjectCard`, `SkeletonEditorPanel`, `SkeletonDashboard`)
+- [x] TanStack Query 캐싱 전략 적용 (`staleTime: 5분`, `gcTime: 30분`, `refetchOnWindowFocus: false`)
+- [x] `lib/tauri-bridge.ts` — Tauri/브라우저 통합 스토리지/파일/알림 API
+- [x] `lib/capacitor.ts` — Tauri 브릿지로 마이그레이션 (하위 호환 유지)
+- [x] axios 제거 완료 (fetch API 사용)
+- [x] Capacitor 완전 제거
+- [x] 불필요 이미지/애니메이션 없음 확인 (Framer Motion, Lottie 미사용)
 
-### Phase 4 — 완성
+### Phase 4 — 완성 ✅ 완료
 
-- [ ] `plugin-api.md` 문서화
-- [ ] APK 서명 + 빌드 자동화
-- [ ] GitHub Actions: 빌드 + APK 아티팩트
+- [x] `docs/desktop-build-guide.md` — Rust 설치 + 빌드 가이드
+- [x] `src-tauri/tauri.conf.json` — NSIS 한국어/영어 설치파일 + 자동 업데이터
+- [x] `.github/workflows/build-desktop.yml` — GitHub Actions CI/CD (Windows/macOS/Linux 병렬 빌드)
+- [x] GitHub Releases → 자동 업데이터 `latest.json` 생성
 
 ---
 

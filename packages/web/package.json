@@ -7,10 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit",
-    "e2e": "playwright test",
-    "e2e:ui": "playwright test --ui",
-    "build:apk": "next build && cd ../.. && npx cap copy android && npx cap sync android"
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.0",
@@ -23,7 +20,14 @@
     "@react-three/fiber": "^8.18.0",
     "@spaceplanner/engine": "*",
     "@tanstack/react-query": "^5.40.0",
-    "axios": "^1.7.2",
+    "@tauri-apps/api": "^2.0.0",
+    "@tauri-apps/plugin-dialog": "^2.0.0",
+    "@tauri-apps/plugin-fs": "^2.0.0",
+    "@tauri-apps/plugin-notification": "^2.0.0",
+    "@tauri-apps/plugin-process": "^2.0.0",
+    "@tauri-apps/plugin-sql": "^2.0.0",
+    "@tauri-apps/plugin-store": "^2.0.0",
+    "@tauri-apps/plugin-updater": "^2.0.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.400.0",
@@ -36,17 +40,12 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
-    "@capacitor/android": "^7.0.0",
-    "@capacitor/cli": "^7.0.0",
-    "@capacitor/core": "^7.0.0",
-    "@capacitor/preferences": "^7.0.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "*",
     "tailwindcss": "^4",
-    "@playwright/test": "^1.48.0",
     "typescript": "^5"
   }
 }

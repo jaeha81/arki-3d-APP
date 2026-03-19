@@ -1,0 +1,67 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Arki-3D",
+  "version": "0.1.0",
+  "identifier": "com.arki.spaceplanner",
+  "build": {
+    "beforeDevCommand": "npm run web:dev",
+    "beforeBuildCommand": "npm run web:build",
+    "devUrl": "http://localhost:3000",
+    "frontendDist": "../packages/web/out"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "title": "Arki-3D",
+        "width": 1440,
+        "height": 900,
+        "minWidth": 1024,
+        "minHeight": 700,
+        "resizable": true,
+        "fullscreen": false,
+        "additionalBrowserArgs": "--enable-gpu --enable-webgl --ignore-gpu-blocklist --enable-zero-copy"
+      }
+    ],
+    "security": {
+      "csp": {
+        "default-src": "'self' ipc: http://ipc.localhost asset: http://asset.localhost",
+        "connect-src": "ipc: http://ipc.localhost https://api.anthropic.com https://*.amazonaws.com",
+        "img-src": "'self' asset: http://asset.localhost blob: data: https:",
+        "style-src": "'unsafe-inline' 'self'",
+        "script-src": "'self' 'wasm-unsafe-eval' asset: http://asset.localhost"
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "createUpdaterArtifacts": true,
+    "windows": {
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper"
+      },
+      "nsis": {
+        "languages": ["Korean", "English"]
+      }
+    }
+  },
+  "plugins": {
+    "sql": {
+      "preload": ["sqlite:arki3d.db"]
+    },
+    "updater": {
+      "endpoints": ["https://github.com/jaeha81/arki-3d-APP/releases/latest/download/latest.json"],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  }
+}

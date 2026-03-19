@@ -1,23 +1,26 @@
 {
-  "name": "spaceplanner",
-  "version": "1.0.0",
+  "name": "arki-3d",
+  "version": "0.1.0",
   "private": true,
   "workspaces": [
     "packages/*",
     "packages/plugins/*"
   ],
   "scripts": {
-    "build": "turbo run build",
+    "web:dev": "turbo run dev --filter=web",
+    "web:build": "turbo run build --filter=web",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "tauri:build:debug": "tauri build --debug",
     "dev": "turbo run dev",
+    "build": "turbo run build",
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "clean": "turbo run clean && rm -rf node_modules",
     "type-check": "turbo run type-check",
-    "cap:copy": "cd packages/web && npm run build && npx cap copy android",
-    "cap:sync": "npx cap sync android",
-    "cap:open": "npx cap open android"
+    "clean": "turbo run clean && rm -rf node_modules"
   },
   "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0",
     "turbo": "^2.0.0",
     "prettier": "^3.2.5",
     "typescript": "^5.4.5"

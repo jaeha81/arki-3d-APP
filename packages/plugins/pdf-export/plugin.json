@@ -1,0 +1,12 @@
+{
+  "id": "pdf-export",
+  "name": "PDF 내보내기",
+  "version": "1.0.0",
+  "description": "견적서 + 도면 PDF 생성",
+  "author": "Arki Team",
+  "capabilities": ["export"],
+  "entry": "./src/index.ts",
+  "minAppVersion": "0.1.0",
+  "icon": "file-text",
+  "permissions": ["api:estimate", "scene:read"]
+}

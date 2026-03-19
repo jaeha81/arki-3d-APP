@@ -1,21 +1,28 @@
 import type { NextConfig } from 'next'
 
+const isProd = process.env.NODE_ENV === 'production'
+const internalHost = process.env.TAURI_DEV_HOST ?? 'localhost'
+
 const nextConfig: NextConfig = {
-  // Capacitor APK 빌드를 위한 정적 export
+  // Static export for Tauri desktop app
   output: 'export',
   trailingSlash: true,
 
+  // Fix asset prefix in dev (Tauri dev server ≠ Next.js server)
+  assetPrefix: isProd ? undefined : `http://${internalHost}:3000`,
+
+  // Disable strict mode to prevent double-mount issues with Three.js canvas
+  reactStrictMode: false,
+
   transpilePackages: ['@spaceplanner/engine'],
+
   images: {
-    // 정적 export 시 Next.js 이미지 최적화 비활성화 (필수)
+    // Required for static export
     unoptimized: true,
-    remotePatterns: [
-      { protocol: 'http', hostname: 'localhost', port: '9000' },
-      { protocol: 'https', hostname: '*.amazonaws.com' },
-    ],
   },
-  turbopack: {},
+
   webpack: config => {
+    // Prevent canvas module bundling (Three.js uses browser canvas)
     config.externals = [
       ...(Array.isArray(config.externals) ? config.externals : []),
       { canvas: 'canvas' },

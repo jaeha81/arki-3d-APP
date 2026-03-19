@@ -1,26 +1,13 @@
-import { Capacitor } from '@capacitor/core'
-import { Preferences } from '@capacitor/preferences'
+/**
+ * @deprecated Use lib/tauri-bridge.ts for new code.
+ * This file is kept for migration compatibility.
+ * Project migrated from Capacitor (Android) to Tauri (Desktop).
+ */
+export { isTauri as isNativeApp, storeGet, storeSet, storeDelete } from './tauri-bridge'
 
-export const platform = Capacitor.getPlatform()
-
-export const isNative = Capacitor.isNativePlatform()
-export const isAndroid = platform === 'android'
-export const isIos = platform === 'ios'
-export const isWeb = platform === 'web'
-
-export async function getPreference(key: string): Promise<string | null> {
-  const { value } = await Preferences.get({ key })
-  return value
-}
-
-export async function setPreference(key: string, value: string): Promise<void> {
-  await Preferences.set({ key, value })
-}
-
-export async function removePreference(key: string): Promise<void> {
-  await Preferences.remove({ key })
-}
-
-export async function clearPreferences(): Promise<void> {
-  await Preferences.clear()
+export const isAndroid = () => false
+export const isIOS = () => false
+export const isDesktop = (): boolean => {
+  if (typeof window === 'undefined') return false
+  return '__TAURI__' in window
 }

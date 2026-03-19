@@ -1,0 +1,16 @@
+{
+  "name": "@arki/plugin-furniture-lib",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "peerDependencies": {
+    "react": "^18.0.0"
+  },
+  "dependencies": {
+    "@arki/plugin-core": "*"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0",
+    "typescript": "^5.4.5"
+  }
+}
