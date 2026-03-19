@@ -1,0 +1,53 @@
+{
+  "version": "1.0.0",
+  "plugins": [
+    {
+      "id": "ai-design",
+      "name": "AI 디자인 어시스턴트",
+      "version": "1.0.0",
+      "description": "Claude AI로 공간 디자인 자동 제안",
+      "capabilities": ["panel", "ai-agent"],
+      "minAppVersion": "1.0.0",
+      "icon": "sparkles",
+      "permissions": ["api:chat", "scene:write"],
+      "downloadUrl": "packages/plugins/ai-design/src/index.ts",
+      "builtin": true
+    },
+    {
+      "id": "estimation",
+      "name": "자동 견적",
+      "version": "1.0.0",
+      "description": "자재+시공비 자동 견적 산출",
+      "capabilities": ["panel"],
+      "minAppVersion": "1.0.0",
+      "icon": "calculator",
+      "permissions": ["api:estimate", "scene:read"],
+      "downloadUrl": "packages/plugins/estimation/src/index.ts",
+      "builtin": true
+    },
+    {
+      "id": "pdf-export",
+      "name": "PDF 내보내기",
+      "version": "1.0.0",
+      "description": "견적서 + 도면 PDF 생성",
+      "capabilities": ["export"],
+      "minAppVersion": "1.0.0",
+      "icon": "file-text",
+      "permissions": ["api:estimate", "scene:read"],
+      "downloadUrl": "packages/plugins/pdf-export/src/index.ts",
+      "builtin": true
+    },
+    {
+      "id": "furniture-lib",
+      "name": "가구 라이브러리",
+      "version": "1.0.0",
+      "description": "3D 가구 에셋 확장 카탈로그",
+      "capabilities": ["asset-provider", "panel"],
+      "minAppVersion": "1.0.0",
+      "icon": "sofa",
+      "permissions": ["api:asset", "scene:write"],
+      "downloadUrl": "packages/plugins/furniture-lib/src/index.ts",
+      "builtin": true
+    }
+  ]
+}
