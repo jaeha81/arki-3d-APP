@@ -1,0 +1,15 @@
+{
+  "name": "@arki/plugin-core",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "dependencies": {
+    "react": "19.2.3",
+    "zustand": "^4.5.2",
+    "lucide-react": "^0.400.0"
+  },
+  "peerDependencies": {
+    "react": ">=19"
+  }
+}
