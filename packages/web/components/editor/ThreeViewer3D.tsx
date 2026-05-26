@@ -1,7 +1,7 @@
 'use client'
 
-import { useMemo, Suspense } from 'react'
-import { Canvas } from '@react-three/fiber'
+import { useMemo, Suspense, useRef, useCallback } from 'react'
+import { Canvas, useThree, useFrame } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import type { FloorPlan } from '@spaceplanner/engine'
 import { buildScene } from '@spaceplanner/engine'
@@ -16,6 +16,28 @@ interface ThreeViewer3DProps {
   onSelect?: (id: string | null) => void
 }
 
+// LOD 거리 임계값 (Three.js 단위 기준)
+const LOD_HIGH_DISTANCE = 8000
+const LOD_MED_DISTANCE = 20000
+
+/** 카메라 거리에 따라 LOD 레벨 반환: 'high' | 'medium' | 'low' */
+function useCameraLod(): 'high' | 'medium' | 'low' {
+  const lodRef = useRef<'high' | 'medium' | 'low'>('high')
+  const { camera, invalidate } = useThree()
+
+  useFrame(() => {
+    const dist = camera.position.length()
+    const next: 'high' | 'medium' | 'low' =
+      dist < LOD_HIGH_DISTANCE ? 'high' : dist < LOD_MED_DISTANCE ? 'medium' : 'low'
+    if (next !== lodRef.current) {
+      lodRef.current = next
+      invalidate() // LOD 변경 시 한 프레임 강제 렌더
+    }
+  })
+
+  return lodRef.current
+}
+
 function SceneContent({
   floorPlan,
   selectedId,
@@ -26,6 +48,7 @@ function SceneContent({
   onSelect?: (id: string | null) => void
 }) {
   const sceneData = useMemo(() => buildScene(floorPlan), [floorPlan])
+  const lod = useCameraLod()
 
   return (
     <>
@@ -35,6 +58,7 @@ function SceneContent({
           data={wallData}
           isSelected={wallData.id === selectedId}
           onClick={onSelect ? () => onSelect(wallData.id) : undefined}
+          lod={lod}
         />
       ))}
 
@@ -46,6 +70,7 @@ function SceneContent({
           item={item}
           isSelected={item.id === selectedId}
           onClick={onSelect ? () => onSelect(item.id) : undefined}
+          lod={lod}
         />
       ))}
     </>
@@ -66,6 +91,10 @@ export function ThreeViewer3D({
   selectedId,
   onSelect,
 }: ThreeViewer3DProps) {
+  // 인터랙션 없을 때 frameloop="demand"로 RAF 일시중단 (Canvas 레벨에서 이미 처리)
+  // OrbitControls change → invalidate() 자동 호출됨
+  const handlePointerMissed = useCallback(() => onSelect?.(null), [onSelect])
+
   return (
     <div className="relative h-full w-full">
       <Canvas
@@ -73,9 +102,14 @@ export function ThreeViewer3D({
         dpr={[1, 2]}
         performance={{ min: 0.5 }}
         shadows="soft"
-        gl={{ antialias: true, powerPreference: 'high-performance' } as object}
+        gl={{
+          antialias: true,
+          powerPreference: 'high-performance',
+          // 미사용 WebGL 객체 자동 정리
+          logarithmicDepthBuffer: false,
+        } as object}
         camera={{ position: [0, 5000, 8000], fov: 45, near: 10, far: 100000 }}
-        onPointerMissed={() => onSelect?.(null)}
+        onPointerMissed={handlePointerMissed}
       >
         <ambientLight intensity={0.4} />
         <directionalLight
@@ -111,6 +145,9 @@ export function ThreeViewer3D({
           maxPolarAngle={Math.PI / 2}
           minDistance={500}
           maxDistance={50000}
+          // 컨트롤 변경 시 한 프레임 강제 렌더 (frameloop="demand"와 조화)
+          enableDamping
+          dampingFactor={0.08}
         />
       </Canvas>
 

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Box, Layers, Users, Calculator, Cloud, Moon, ChevronRight, Check } from 'lucide-react'
+import { Box, Layers, Users, Calculator, Cloud, Moon, ChevronRight, Check, ArrowRight, Star } from 'lucide-react'
 
 export default function Home() {
   return (
@@ -32,15 +32,15 @@ export default function Home() {
       <section className="mx-auto max-w-7xl px-4 pb-24 pt-20 text-center sm:px-6 lg:px-8">
         <div className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--muted))] px-4 py-1.5 text-xs font-medium text-[hsl(var(--muted-foreground))] mb-6">
           <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--primary))]" />
-          B2B SaaS — 건축·인테리어 전용 설계 플랫폼
+          건축·인테리어 사무소 전용 B2B SaaS
         </div>
         <h1 className="mx-auto max-w-4xl text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-          건축/인테리어 설계의{' '}
+          3D 도면 설계의{' '}
           <span className="text-[hsl(var(--primary))]">새로운 기준</span>
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-lg text-[hsl(var(--muted-foreground))]">
-          2D 도면과 3D 시각화를 하나의 화면에서 동시에 편집하세요.
-          실시간 동기화로 설계 작업 시간을 절반으로 줄여드립니다.
+          2D 도면을 그리는 순간 3D로 실시간 시각화. 견적 자동화와 클라이언트 공유까지.
+          설계 작업 시간을 절반으로 줄이고 수주율을 높이세요.
         </p>
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Link
@@ -51,10 +51,11 @@ export default function Home() {
             <ChevronRight className="h-4 w-4" />
           </Link>
           <Link
-            href="/login"
+            href="/pricing"
             className="inline-flex items-center gap-2 rounded-xl border border-[hsl(var(--border))] px-6 py-3 text-base font-semibold transition hover:bg-[hsl(var(--accent))]"
           >
-            데모 보기
+            요금제 보기
+            <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
@@ -74,6 +75,82 @@ export default function Home() {
               <div className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">{stat.label}</div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* 3D Preview Showcase */}
+      <section className="py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-10 text-center">
+            <h2 className="text-3xl font-bold">실제 작업 화면을 미리 확인하세요</h2>
+            <p className="mt-3 text-[hsl(var(--muted-foreground))]">
+              2D 도면과 3D 뷰가 하나의 화면에서 실시간으로 동기화됩니다
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {/* 2D 에디터 placeholder */}
+            <div className="group relative overflow-hidden rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--card))]">
+              <div className="flex h-64 items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900">
+                <div className="text-center">
+                  <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-[hsl(var(--primary))]/10">
+                    <Layers className="h-8 w-8 text-[hsl(var(--primary))]" />
+                  </div>
+                  <p className="text-sm font-semibold text-[hsl(var(--foreground))]">2D 도면 에디터</p>
+                  <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
+                    벽·문·창문을 직관적으로 배치
+                  </p>
+                </div>
+              </div>
+              <div className="p-5">
+                <h3 className="font-semibold">2D 평면도 설계</h3>
+                <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
+                  캔버스에서 벽, 문, 창문을 배치하면 치수가 자동으로 계산됩니다.
+                  스냅 기능으로 정밀한 도면 작성이 가능합니다.
+                </p>
+              </div>
+            </div>
+
+            {/* 3D 뷰어 placeholder */}
+            <div className="group relative overflow-hidden rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--card))]">
+              <div className="flex h-64 items-center justify-center bg-gradient-to-br from-blue-50 to-violet-100 dark:from-blue-950/40 dark:to-violet-950/40">
+                <div className="text-center">
+                  <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-[hsl(var(--primary))]/10">
+                    <Box className="h-8 w-8 text-[hsl(var(--primary))]" />
+                  </div>
+                  <p className="text-sm font-semibold text-[hsl(var(--foreground))]">3D 실시간 렌더링</p>
+                  <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
+                    WebGL 기반 고성능 3D 뷰어
+                  </p>
+                </div>
+              </div>
+              <div className="p-5">
+                <h3 className="font-semibold">3D 공간 시각화</h3>
+                <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
+                  도면이 즉시 3D로 변환됩니다. 가구를 배치하고 카메라를 회전해
+                  클라이언트에게 완성된 공간감을 전달하세요.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* 3D 품질 배지 */}
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            {[
+              'WebGL 고성능 렌더링',
+              'InstancedMesh 최적화',
+              'LOD 거리 기반 최적화',
+              '실시간 그림자',
+              'GLTF 가구 모델',
+            ].map(badge => (
+              <span
+                key={badge}
+                className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--muted))] px-3 py-1 text-xs font-medium text-[hsl(var(--muted-foreground))]"
+              >
+                <Star className="h-3 w-3 text-[hsl(var(--primary))]" />
+                {badge}
+              </span>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -178,46 +255,39 @@ export default function Home() {
       <section className="bg-[hsl(var(--muted))]/40 py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
-            <h2 className="text-3xl font-bold">합리적인 요금제</h2>
-            <p className="mt-3 text-[hsl(var(--muted-foreground))]">Toss Payments로 간편하게 결제하세요</p>
+            <h2 className="text-3xl font-bold">합리적인 B2B 요금제</h2>
+            <p className="mt-3 text-[hsl(var(--muted-foreground))]">
+              팀 규모에 맞게 선택하세요. Toss Payments로 간편 결제.
+            </p>
           </div>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
             {[
               {
-                name: 'Free',
-                price: '₩0',
+                name: 'Studio',
+                price: '₩49,000',
                 period: '/월',
-                desc: '개인 테스트용',
-                features: ['프로젝트 3개', '기본 2D/3D 편집', '1GB 저장공간'],
-                cta: '무료 시작',
-                highlight: false,
-              },
-              {
-                name: 'Starter',
-                price: '₩19,900',
-                period: '/월',
-                desc: '소규모 사무소',
-                features: ['프로젝트 20개', '팀원 3명', '10GB 저장공간', '이메일 지원'],
+                desc: '1~3인 건축/인테리어 스튜디오',
+                features: ['프로젝트 20개', '팀원 3명', '50GB 저장공간', 'AI 크레딧 50회/월', 'PDF 견적서'],
                 cta: '시작하기',
                 highlight: false,
               },
               {
-                name: 'Pro',
-                price: '₩49,900',
+                name: 'Firm',
+                price: '₩99,000',
                 period: '/월',
-                desc: '전문 사무소',
-                features: ['프로젝트 무제한', '팀원 무제한', '100GB 저장공간', '견적 자동화', '우선 지원'],
+                desc: '5~20인 전문 건축사무소',
+                features: ['프로젝트 무제한', '팀원 무제한', '500GB 저장공간', 'AI 크레딧 무제한', '우선 지원'],
                 cta: '시작하기',
                 highlight: true,
-                badge: '인기',
+                badge: '추천',
               },
               {
                 name: 'Enterprise',
                 price: '문의',
                 period: '',
-                desc: '대형 건설사',
-                features: ['맞춤형 설정', '전용 서버', '전담 매니저', 'API 연동', 'SLA 보장'],
-                cta: '문의하기',
+                desc: '대형 건설사 / 맞춤 계약',
+                features: ['전용 서버', '전담 매니저', 'API 연동', 'SLA 보장', '커스텀 에셋'],
+                cta: '영업팀 문의',
                 highlight: false,
               },
             ].map((plan) => (
@@ -251,7 +321,7 @@ export default function Home() {
                   ))}
                 </ul>
                 <Link
-                  href={plan.name === 'Enterprise' ? '/contact' : '/register'}
+                  href="/pricing"
                   className={`rounded-xl py-2.5 text-center text-sm font-semibold transition ${
                     plan.highlight
                       ? 'bg-[hsl(var(--primary))] text-white hover:opacity-90'
@@ -262,6 +332,15 @@ export default function Home() {
                 </Link>
               </div>
             ))}
+          </div>
+          <div className="mt-8 text-center">
+            <Link
+              href="/pricing"
+              className="inline-flex items-center gap-2 text-sm font-medium text-[hsl(var(--primary))] hover:underline"
+            >
+              전체 기능 비교 보기
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </div>
       </section>
@@ -353,6 +432,7 @@ export default function Home() {
             <div className="flex flex-wrap gap-6 text-sm text-[hsl(var(--muted-foreground))]">
               <Link href="/login" className="hover:text-[hsl(var(--foreground))]">로그인</Link>
               <Link href="/register" className="hover:text-[hsl(var(--foreground))]">회원가입</Link>
+              <Link href="/pricing" className="hover:text-[hsl(var(--foreground))]">요금제</Link>
               <Link href="/projects" className="hover:text-[hsl(var(--foreground))]">대시보드</Link>
               <Link href="/contact" className="hover:text-[hsl(var(--foreground))]">문의하기</Link>
             </div>
