@@ -2,6 +2,7 @@
 
 import { Suspense, useMemo } from 'react'
 import { useGLTF } from '@react-three/drei'
+import { SkeletonUtils } from 'three-stdlib'
 import type { FurniturePlacement3D } from '@spaceplanner/engine'
 
 interface FurnitureMeshProps {
@@ -13,7 +14,7 @@ interface FurnitureMeshProps {
 
 function GltfModel({ url }: { url: string }) {
   const { scene } = useGLTF(url)
-  const cloned = useMemo(() => scene.clone(), [scene])
+  const cloned = useMemo(() => SkeletonUtils.clone(scene), [scene])
   return <primitive object={cloned} />
 }
 
