@@ -69,7 +69,10 @@ export function ThreeViewer3D({
   return (
     <div className="relative h-full w-full">
       <Canvas
-        shadows
+        frameloop="demand"
+        dpr={[1, 1.5]}
+        shadows="soft"
+        gl={{ antialias: true, powerPreference: 'high-performance' } as object}
         camera={{ position: [0, 5000, 8000], fov: 45, near: 10, far: 100000 }}
         onPointerMissed={() => onSelect?.(null)}
       >
@@ -78,8 +81,8 @@ export function ThreeViewer3D({
           position={[5000, 8000, 3000]}
           intensity={0.8}
           castShadow
-          shadow-mapSize-width={2048}
-          shadow-mapSize-height={2048}
+          shadow-mapSize-width={1024}
+          shadow-mapSize-height={1024}
           shadow-camera-far={50000}
           shadow-camera-left={-10000}
           shadow-camera-right={10000}

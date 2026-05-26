@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense } from 'react'
+import { Suspense, useMemo } from 'react'
 import { useGLTF } from '@react-three/drei'
 import type { FurniturePlacement3D } from '@spaceplanner/engine'
 
@@ -13,7 +13,8 @@ interface FurnitureMeshProps {
 
 function GltfModel({ url }: { url: string }) {
   const { scene } = useGLTF(url)
-  return <primitive object={scene.clone()} />
+  const cloned = useMemo(() => scene.clone(), [scene])
+  return <primitive object={cloned} />
 }
 
 function PlaceholderBox({ isSelected }: { isSelected: boolean }) {

@@ -1,6 +1,11 @@
 'use client'
 
+import { MeshStandardMaterial } from 'three'
 import type { WallMeshData, BoxSegment } from '@spaceplanner/engine'
+
+// Shared materials — created once, never mutated
+const MAT_NORMAL = new MeshStandardMaterial({ color: '#e8e8e8' })
+const MAT_SELECTED = new MeshStandardMaterial({ color: '#4a90d9' })
 
 interface WallMeshProps {
   data: WallMeshData
@@ -24,10 +29,10 @@ function WallSegment({
       position={segment.position}
       castShadow
       receiveShadow
+      material={isSelected ? MAT_SELECTED : MAT_NORMAL}
       onClick={onClick ? (e: { stopPropagation: () => void }) => { e.stopPropagation(); onClick() } : undefined}
     >
       <boxGeometry args={[w, h, d]} />
-      <meshStandardMaterial color={isSelected ? '#4a90d9' : '#e8e8e8'} />
     </mesh>
   )
 }
