@@ -42,19 +42,23 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
               className="h-full w-full object-cover"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center">
-              <div className="grid h-full w-full place-items-center bg-gradient-to-br from-[hsl(var(--muted))] to-[hsl(var(--secondary))]">
-                <svg
-                  className="h-12 w-12 text-[hsl(var(--muted-foreground))]/40"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 15l4-4a2 2 0 0 1 2.8 0L16 16m-2-2 1.2-1.2a2 2 0 0 1 2.8 0L20 15" />
-                </svg>
-              </div>
+            <div className="relative h-full w-full overflow-hidden bg-[hsl(var(--muted))]/60">
+              {/* Blueprint grid */}
+              <svg className="absolute inset-0 h-full w-full opacity-40" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <pattern id={`grid-${project.id}`} width="16" height="16" patternUnits="userSpaceOnUse">
+                    <path d="M 16 0 L 0 0 0 16" fill="none" stroke="hsl(var(--border))" strokeWidth="0.5" />
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill={`url(#grid-${project.id})`} />
+              </svg>
+              {/* Simple floor plan lines */}
+              <svg className="absolute inset-0 h-full w-full" viewBox="0 0 160 100" preserveAspectRatio="xMidYMid meet">
+                <rect x="30" y="15" width="100" height="70" fill="none" stroke="hsl(var(--muted-foreground))" strokeWidth="1.5" opacity="0.5" />
+                <line x1="30" y1="55" x2="90" y2="55" stroke="hsl(var(--muted-foreground))" strokeWidth="1" opacity="0.4" />
+                <line x1="90" y1="15" x2="90" y2="85" stroke="hsl(var(--muted-foreground))" strokeWidth="1" opacity="0.4" />
+                <path d="M 90 55 A 18 18 0 0 1 72 55" fill="none" stroke="hsl(var(--primary))" strokeWidth="1" opacity="0.5" strokeDasharray="3 2" />
+              </svg>
             </div>
           )}
         </div>

@@ -60,93 +60,147 @@ export default function Home() {
         </div>
 
         {/* Stats Bar */}
-        <div className="mx-auto mt-16 grid max-w-3xl grid-cols-2 gap-6 sm:grid-cols-4">
+        <div className="mx-auto mt-16 grid max-w-3xl grid-cols-2 gap-4 sm:grid-cols-4">
           {[
-            { value: '1,200+', label: '완성된 프로젝트' },
+            { value: '50%', label: '설계 시간 단축' },
+            { value: '1,200+', label: '완성 프로젝트' },
             { value: '80+', label: '파트너 사무소' },
-            { value: '4가지', label: '요금제 플랜' },
-            { value: '무료', label: '체험 시작' },
+            { value: '14일', label: '무료 체험' },
           ].map((stat) => (
             <div
               key={stat.label}
-              className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5 text-center"
+              className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5 text-center"
             >
-              <div className="text-2xl font-bold text-[hsl(var(--primary))]">{stat.value}</div>
+              <div className="text-2xl font-bold tabular-nums">{stat.value}</div>
               <div className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">{stat.label}</div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* 3D Preview Showcase */}
+      {/* Editor UI Showcase */}
       <section className="py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-10 text-center">
-            <h2 className="text-3xl font-bold">실제 작업 화면을 미리 확인하세요</h2>
+            <h2 className="text-3xl font-bold tracking-tight">실제 작업 화면</h2>
             <p className="mt-3 text-[hsl(var(--muted-foreground))]">
               2D 도면과 3D 뷰가 하나의 화면에서 실시간으로 동기화됩니다
             </p>
           </div>
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {/* 2D 에디터 placeholder */}
-            <div className="group relative overflow-hidden rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--card))]">
-              <div className="flex h-64 items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900">
-                <div className="text-center">
-                  <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-[hsl(var(--primary))]/10">
-                    <Layers className="h-8 w-8 text-[hsl(var(--primary))]" />
-                  </div>
-                  <p className="text-sm font-semibold text-[hsl(var(--foreground))]">2D 도면 에디터</p>
-                  <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
-                    벽·문·창문을 직관적으로 배치
-                  </p>
-                </div>
+
+          {/* App Shell Mockup */}
+          <div className="overflow-hidden rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] shadow-xl">
+            {/* Window chrome */}
+            <div className="flex items-center gap-2 border-b border-[hsl(var(--border))] bg-[hsl(var(--muted))]/60 px-4 py-3">
+              <div className="flex gap-1.5">
+                <div className="h-3 w-3 rounded-full bg-red-400/70" />
+                <div className="h-3 w-3 rounded-full bg-amber-400/70" />
+                <div className="h-3 w-3 rounded-full bg-emerald-400/70" />
               </div>
-              <div className="p-5">
-                <h3 className="font-semibold">2D 평면도 설계</h3>
-                <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
-                  캔버스에서 벽, 문, 창문을 배치하면 치수가 자동으로 계산됩니다.
-                  스냅 기능으로 정밀한 도면 작성이 가능합니다.
-                </p>
+              <div className="ml-2 flex-1 max-w-[240px] rounded-md bg-[hsl(var(--background))] border border-[hsl(var(--border))] px-3 py-1 text-xs text-[hsl(var(--muted-foreground))]">
+                spaceplanner.app/editor/proj-001
               </div>
             </div>
 
-            {/* 3D 뷰어 placeholder */}
-            <div className="group relative overflow-hidden rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--card))]">
-              <div className="flex h-64 items-center justify-center bg-gradient-to-br from-blue-50 to-violet-100 dark:from-blue-950/40 dark:to-violet-950/40">
-                <div className="text-center">
-                  <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-[hsl(var(--primary))]/10">
-                    <Box className="h-8 w-8 text-[hsl(var(--primary))]" />
+            {/* Editor body */}
+            <div className="flex h-[380px]">
+              {/* Left sidebar */}
+              <div className="hidden w-14 flex-shrink-0 flex-col items-center gap-3 border-r border-[hsl(var(--border))] bg-[hsl(var(--muted))]/40 py-4 sm:flex">
+                {[Layers, Box, Users, Calculator].map((Icon, i) => (
+                  <div
+                    key={i}
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg transition ${
+                      i === 0 ? 'bg-[hsl(var(--primary))] text-white' : 'text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--accent))]'
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
                   </div>
-                  <p className="text-sm font-semibold text-[hsl(var(--foreground))]">3D 실시간 렌더링</p>
-                  <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
-                    WebGL 기반 고성능 3D 뷰어
-                  </p>
-                </div>
+                ))}
               </div>
-              <div className="p-5">
-                <h3 className="font-semibold">3D 공간 시각화</h3>
-                <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
-                  도면이 즉시 3D로 변환됩니다. 가구를 배치하고 카메라를 회전해
-                  클라이언트에게 완성된 공간감을 전달하세요.
-                </p>
+
+              {/* 2D Canvas panel */}
+              <div className="relative flex-1 border-r border-[hsl(var(--border))] bg-[hsl(var(--editor-bg))]">
+                <div className="absolute left-3 top-3 flex items-center gap-2 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-2.5 py-1.5 text-xs font-medium">
+                  <Layers className="h-3.5 w-3.5 text-[hsl(var(--primary))]" />
+                  2D 평면도
+                </div>
+                {/* Grid */}
+                <svg className="absolute inset-0 h-full w-full opacity-30" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+                      <path d="M 24 0 L 0 0 0 24" fill="none" stroke="hsl(var(--grid-color))" strokeWidth="0.5" />
+                    </pattern>
+                  </defs>
+                  <rect width="100%" height="100%" fill="url(#grid)" />
+                </svg>
+                {/* Floor plan outline */}
+                <svg className="absolute inset-0 h-full w-full" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid meet">
+                  {/* Room outline */}
+                  <rect x="60" y="50" width="280" height="200" fill="none" stroke="hsl(var(--foreground))" strokeWidth="3" rx="1" />
+                  {/* Interior wall */}
+                  <line x1="200" y1="50" x2="200" y2="200" stroke="hsl(var(--foreground))" strokeWidth="3" />
+                  <line x1="60" y1="175" x2="200" y2="175" stroke="hsl(var(--foreground))" strokeWidth="2" />
+                  {/* Door arc */}
+                  <path d="M 200 200 A 25 25 0 0 1 175 200" fill="none" stroke="hsl(var(--primary))" strokeWidth="1.5" strokeDasharray="4 2" />
+                  <line x1="200" y1="200" x2="200" y2="225" stroke="hsl(var(--foreground))" strokeWidth="1.5" />
+                  {/* Dimension lines */}
+                  <line x1="60" y1="270" x2="340" y2="270" stroke="hsl(var(--muted-foreground))" strokeWidth="1" />
+                  <text x="200" y="282" textAnchor="middle" fontSize="9" fill="hsl(var(--muted-foreground))">9,600mm</text>
+                  {/* Window indicators */}
+                  <rect x="110" y="48" width="40" height="4" fill="hsl(var(--primary))" rx="1" opacity="0.8" />
+                  <rect x="260" y="48" width="40" height="4" fill="hsl(var(--primary))" rx="1" opacity="0.8" />
+                </svg>
+              </div>
+
+              {/* 3D Viewport panel */}
+              <div className="relative hidden flex-1 bg-[hsl(var(--muted))]/20 lg:block">
+                <div className="absolute left-3 top-3 flex items-center gap-2 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-2.5 py-1.5 text-xs font-medium">
+                  <Box className="h-3.5 w-3.5 text-[hsl(var(--primary))]" />
+                  3D 뷰
+                </div>
+                {/* Isometric room representation */}
+                <svg className="absolute inset-0 h-full w-full" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid meet">
+                  {/* Floor */}
+                  <polygon points="80,180 200,240 320,180 200,120" fill="hsl(var(--muted))" stroke="hsl(var(--border))" strokeWidth="1" />
+                  {/* Left wall */}
+                  <polygon points="80,80 80,180 200,240 200,140" fill="hsl(var(--card))" stroke="hsl(var(--border))" strokeWidth="1" />
+                  {/* Right wall */}
+                  <polygon points="320,80 320,180 200,240 200,140" fill="hsl(var(--secondary))" stroke="hsl(var(--border))" strokeWidth="1" />
+                  {/* Ceiling edge */}
+                  <polygon points="80,80 200,140 320,80 200,20" fill="none" stroke="hsl(var(--border))" strokeWidth="1" strokeDasharray="4 2" />
+                  {/* Simple furniture: sofa */}
+                  <rect x="110" y="148" width="50" height="22" rx="3" fill="hsl(var(--primary))" opacity="0.5" />
+                  <rect x="108" y="142" width="54" height="10" rx="3" fill="hsl(var(--primary))" opacity="0.7" />
+                  {/* Simple furniture: table */}
+                  <ellipse cx="230" cy="175" rx="22" ry="12" fill="hsl(var(--muted-foreground))" opacity="0.4" />
+                  {/* Window on left wall */}
+                  <rect x="100" y="100" width="40" height="28" rx="2" fill="hsl(var(--primary))" opacity="0.2" stroke="hsl(var(--primary))" strokeWidth="1" />
+                </svg>
+                {/* Camera controls hint */}
+                <div className="absolute bottom-3 right-3 flex gap-1">
+                  {['궤도', '이동', '줌'].map(label => (
+                    <div key={label} className="rounded border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-2 py-0.5 text-[10px] text-[hsl(var(--muted-foreground))]">
+                      {label}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* 3D 품질 배지 */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+          {/* Tech badges */}
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             {[
-              'WebGL 고성능 렌더링',
+              'WebGL 렌더링',
               'InstancedMesh 최적화',
-              'LOD 거리 기반 최적화',
+              'LOD 자동 적용',
               '실시간 그림자',
-              'GLTF 가구 모델',
+              'GLTF 가구 라이브러리',
             ].map(badge => (
               <span
                 key={badge}
                 className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--muted))] px-3 py-1 text-xs font-medium text-[hsl(var(--muted-foreground))]"
               >
-                <Star className="h-3 w-3 text-[hsl(var(--primary))]" />
                 {badge}
               </span>
             ))}

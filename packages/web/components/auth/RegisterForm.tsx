@@ -1,12 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { useAuth } from '@/lib/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2 } from 'lucide-react'
 
 export function RegisterForm() {
@@ -23,11 +21,11 @@ export function RegisterForm() {
     setError('')
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match.')
+      setError('비밀번호가 일치하지 않습니다.')
       return
     }
     if (password.length < 8) {
-      setError('Password must be at least 8 characters.')
+      setError('비밀번호는 8자 이상이어야 합니다.')
       return
     }
 
@@ -35,83 +33,88 @@ export function RegisterForm() {
     try {
       await register({ email, password, name })
     } catch {
-      setError('Registration failed. Please try again.')
+      setError('회원가입에 실패했습니다. 다시 시도해주세요.')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader className="space-y-1 text-center">
-        <CardTitle className="text-2xl font-bold">Create Account</CardTitle>
-        <CardDescription>Enter your information to get started</CardDescription>
-      </CardHeader>
-      <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-4">
-          {error && (
-            <div className="rounded-md bg-[hsl(var(--destructive))]/10 p-3 text-sm text-[hsl(var(--destructive))]">
-              {error}
-            </div>
-          )}
-          <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              type="text"
-              placeholder="Your name"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="At least 8 characters"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              placeholder="Confirm your password"
-              value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
-              required
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Create Account
-          </Button>
-        </CardContent>
-      </form>
-      <CardFooter className="justify-center">
-        <p className="text-sm text-[hsl(var(--muted-foreground))]">
-          Already have an account?{' '}
-          <Link href="/login" className="font-medium text-[hsl(var(--primary))] hover:underline">
-            Sign in
-          </Link>
-        </p>
-      </CardFooter>
-    </Card>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {error && (
+        <div className="rounded-lg border border-[hsl(var(--destructive))]/20 bg-[hsl(var(--destructive))]/8 p-3 text-sm text-[hsl(var(--destructive))]">
+          {error}
+        </div>
+      )}
+
+      <div className="space-y-1.5">
+        <Label htmlFor="name" className="text-sm font-medium">이름</Label>
+        <Input
+          id="name"
+          type="text"
+          placeholder="홍길동"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          required
+          className="h-10"
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="email" className="text-sm font-medium">이메일</Label>
+        <Input
+          id="email"
+          type="email"
+          placeholder="you@example.com"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          required
+          className="h-10"
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="password" className="text-sm font-medium">비밀번호</Label>
+        <Input
+          id="password"
+          type="password"
+          placeholder="8자 이상"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          required
+          className="h-10"
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="confirmPassword" className="text-sm font-medium">비밀번호 확인</Label>
+        <Input
+          id="confirmPassword"
+          type="password"
+          placeholder="비밀번호를 다시 입력하세요"
+          value={confirmPassword}
+          onChange={e => setConfirmPassword(e.target.value)}
+          required
+          className="h-10"
+        />
+      </div>
+
+      <Button type="submit" className="h-10 w-full font-semibold" disabled={loading}>
+        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        무료로 시작하기
+      </Button>
+
+      <p className="text-center text-xs text-[hsl(var(--muted-foreground))]">
+        가입 시{' '}
+        <span className="underline underline-offset-2 cursor-pointer hover:text-[hsl(var(--foreground))]">
+          서비스 이용약관
+        </span>
+        {' '}및{' '}
+        <span className="underline underline-offset-2 cursor-pointer hover:text-[hsl(var(--foreground))]">
+          개인정보처리방침
+        </span>
+        에 동의하는 것으로 간주합니다.
+      </p>
+    </form>
   )
 }
