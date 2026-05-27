@@ -27,7 +27,10 @@ JSON으로만 응답:
 
 
 async def analyze_intent(message: str, project_context: dict) -> tuple[dict, "ai_router.AIResult | None"]:
-    """사용자 메시지 의도 분석. (결과 dict, AIResult) 반환."""
+    """사용자 메시지 의도 분석. (결과 dict, AIResult) 반환.
+
+    Phase 4: user_message를 ai_router에 전달해 복잡도 기반 스마트 모델 선택 지원.
+    """
     try:
         data, result = await ai_router.call_json(
             request_type="analyze_intent",
@@ -39,6 +42,7 @@ async def analyze_intent(message: str, project_context: dict) -> tuple[dict, "ai
                 }
             ],
             max_tokens=500,
+            user_message=message,
         )
         if data:
             return data, result

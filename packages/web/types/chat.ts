@@ -94,6 +94,7 @@ export interface MessageResponse {
   credits_used: number
   credits_remaining: number
   message_id: string
+  cached?: boolean  // Phase 4: 캐시 히트 시 true
 }
 
 export type MessageRole = 'user' | 'assistant' | 'system'
@@ -117,6 +118,10 @@ export interface UiMessage {
   concept?: ConceptProposal
   estimate_draft?: EstimateDraft
   isLoading?: boolean
+  // Phase 4: 크레딧 소진 에러 표시용
+  isError?: boolean
+  upgradeUrl?: string
+  errorHint?: string
   createdAt: Date
 }
 

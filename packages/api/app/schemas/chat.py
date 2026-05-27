@@ -92,6 +92,7 @@ class MessageResponse(BaseModel):
     credits_used: int
     credits_remaining: int
     message_id: str
+    cached: bool = False  # Phase 4: 캐시 히트 시 true, 크레딧 소비 없음
 
 
 class ChatHistoryItem(BaseModel):

@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useEffect, useState, useCallback } from 'react'
-import { Paperclip, Send, X, Bot, FileText } from 'lucide-react'
+import { Paperclip, Send, X, Bot, FileText, Zap } from 'lucide-react'
 import { useMutation } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { useEditorStore } from '@/lib/stores/editor-store'
@@ -134,11 +134,57 @@ function SummaryModal({ summary, onClose }: SummaryModalProps) {
   )
 }
 
+/** 크레딧 잔여량 배지 */
+function CreditBadge({ remaining, cached }: { remaining: number | null; cached: boolean }) {
+  if (remaining === null) return null
+  const isLow = remaining <= 3
+  return (
+    <div
+      className={cn(
+        'flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium',
+        isLow
+          ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400'
+          : 'bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))]',
+      )}
+      title={cached ? '마지막 응답: 캐시 사용 (크레딧 미소모)' : undefined}
+    >
+      {cached && <Zap className="h-2.5 w-2.5 text-yellow-500" />}
+      AI 크레딧 {remaining}회 남음
+    </div>
+  )
+}
+
+/** 크레딧 소진 업그레이드 CTA */
+function CreditExhaustedCard({ upgradeUrl, hint }: { upgradeUrl?: string; hint?: string }) {
+  return (
+    <div className="mx-3 mb-2 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
+      <p className="text-xs font-semibold text-red-700 dark:text-red-400 mb-1">
+        월 AI 크레딧이 모두 소진되었습니다
+      </p>
+      {hint && (
+        <p className="text-[11px] text-red-600 dark:text-red-300 mb-2">{hint}</p>
+      )}
+      {upgradeUrl && (
+        <a
+          href={upgradeUrl}
+          className="inline-block rounded-md bg-red-600 px-3 py-1 text-[11px] font-medium text-white hover:bg-red-700 transition-colors"
+        >
+          Pro로 업그레이드 →
+        </a>
+      )}
+    </div>
+  )
+}
+
 export function ChatPanel() {
   const isChatOpen = useEditorStore((s) => s.isChatOpen)
   const toggleChat = useEditorStore((s) => s.toggleChat)
-  const { messages: apiMessages, sendMessage, isLoading } = useChat('current-project')
+  const { messages: apiMessages, sendMessage, isLoading, credits } = useChat('current-project')
   const allMessages = [WELCOME, ...apiMessages]
+
+  // 마지막 에러 메시지에서 업그레이드 정보 추출
+  const lastMsg = apiMessages[apiMessages.length - 1]
+  const showUpgradeCta = lastMsg?.isError && lastMsg?.upgradeUrl
 
   const [inputValue, setInputValue] = useState('')
   const [summaryModal, setSummaryModal] = useState<ConsultationSummary | null>(null)
@@ -187,7 +233,9 @@ export function ChatPanel() {
           <Bot className="h-4 w-4 text-[hsl(var(--primary))]" />
           <h3 className="text-sm font-semibold">AI 디자인 어시스턴트</h3>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
+          {/* Phase 4: 크레딧 잔여량 실시간 표시 */}
+          <CreditBadge remaining={credits.remaining} cached={credits.lastCached} />
           <Button
             variant="ghost"
             size="icon"
@@ -218,7 +266,9 @@ export function ChatPanel() {
                     'rounded-lg px-3 py-2 text-sm',
                     msg.role === 'user'
                       ? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]'
-                      : 'bg-[hsl(var(--muted))] text-[hsl(var(--foreground))]',
+                      : msg.isError
+                        ? 'bg-red-50 text-red-700 border border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800'
+                        : 'bg-[hsl(var(--muted))] text-[hsl(var(--foreground))]',
                   )}
                 >
                   {msg.isLoading ? <LoadingDots /> : msg.content}
@@ -261,6 +311,14 @@ export function ChatPanel() {
             </button>
           ))}
         </div>
+      )}
+
+      {/* Phase 4: 크레딧 소진 업그레이드 CTA */}
+      {showUpgradeCta && (
+        <CreditExhaustedCard
+          upgradeUrl={lastMsg.upgradeUrl}
+          hint={lastMsg.errorHint}
+        />
       )}
 
       {/* 입력 영역 */}

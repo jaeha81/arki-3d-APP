@@ -19,7 +19,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@spaceplanner/engine": ["./lib/engine/index.ts"],
+      "@spaceplanner/engine/*": ["./lib/engine/*"]
     }
   },
   "include": [

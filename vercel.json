@@ -1,7 +1,7 @@
 {
   "framework": "nextjs",
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next",
+  "buildCommand": "npx turbo run build --filter=web",
+  "outputDirectory": "packages/web/.next",
   "installCommand": "npm install --legacy-peer-deps",
   "env": {
     "NEXT_PUBLIC_API_URL": "https://arki-3d-app.vercel.app/api",

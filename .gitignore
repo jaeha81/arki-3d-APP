@@ -60,3 +60,4 @@ minio_data/
 
 # Alembic __pycache__ only
 packages/api/migrations/versions/__pycache__/
+.vercel

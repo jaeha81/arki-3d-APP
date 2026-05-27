@@ -24,8 +24,8 @@ export function EditorCanvas() {
   // framer-motion 뷰 전환 variants — Spline 스타일 fade + scale
   const viewVariants = {
     initial: { opacity: 0, scale: 0.97 },
-    animate: { opacity: 1, scale: 1, transition: { duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] } },
-    exit: { opacity: 0, scale: 1.02, transition: { duration: 0.15, ease: 'easeIn' } },
+    animate: { opacity: 1, scale: 1, transition: { duration: 0.25, ease: 'easeOut' as const } },
+    exit: { opacity: 0, scale: 1.02, transition: { duration: 0.15, ease: 'easeIn' as const } },
   }
 
   return (

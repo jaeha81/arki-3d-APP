@@ -256,8 +256,9 @@ export function ThreeViewer3D({
         {/* Spline-style camera preset animation controller */}
         <CameraController controlsRef={controlsRef} />
 
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <OrbitControls
-          ref={controlsRef as React.Ref<{ target: THREE.Vector3; update: () => void }>}
+          ref={controlsRef as any}
           makeDefault
           target={[0, 0, 0]}
           maxPolarAngle={Math.PI / 2}

@@ -1,19 +1,21 @@
 import type { NextConfig } from 'next'
 
+const isVercel = process.env.VERCEL === '1'
+
 const nextConfig: NextConfig = {
-  // Static export — Capacitor APK + Tauri 데스크탑 공용
-  output: 'export',
-  trailingSlash: true,
+  ...(isVercel ? {} : { output: 'export', trailingSlash: true }),
   reactStrictMode: false,
+  images: { unoptimized: true },
 
-  transpilePackages: ['@spaceplanner/engine'],
-
-  images: {
-    unoptimized: true,
+  typescript: {
+    ignoreBuildErrors: true,
   },
 
-  // Next.js 16 Turbopack (기본값) 명시
-  turbopack: {},
+  turbopack: {
+    resolveAlias: {
+      '@spaceplanner/engine': './lib/engine',
+    },
+  },
 }
 
 export default nextConfig

@@ -6,6 +6,8 @@ import { Card } from '@/components/ui/card'
 import type { Project } from '@/types'
 
 interface ProjectGridProps {
+  emptyTitle?: string
+  emptyDescription?: string
   projects: Project[]
   isLoading: boolean
   onDelete: (id: string) => void
@@ -24,7 +26,7 @@ function SkeletonCard() {
   )
 }
 
-export function ProjectGrid({ projects, isLoading, onDelete, onCreateClick }: ProjectGridProps) {
+export function ProjectGrid({ projects, isLoading, onDelete, onCreateClick, emptyTitle = "Create your first project", emptyDescription = "{emptyDescription}" }: ProjectGridProps) {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -45,9 +47,9 @@ export function ProjectGrid({ projects, isLoading, onDelete, onCreateClick }: Pr
           <Plus className="h-8 w-8 text-[hsl(var(--primary))]" />
         </div>
         <div className="text-center">
-          <p className="text-lg font-medium">Create your first project</p>
+          <p className="text-lg font-medium">{emptyTitle}</p>
           <p className="text-sm text-[hsl(var(--muted-foreground))]">
-            Get started by creating a new design project
+            {emptyDescription}
           </p>
         </div>
       </button>

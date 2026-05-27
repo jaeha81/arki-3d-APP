@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { Box, Layers, Users, Calculator, Cloud, Moon, ChevronRight, Check, ArrowRight, Star } from 'lucide-react'
+import { Box, Layers, Users, Calculator, Cloud, Moon, ChevronRight, Check, ArrowRight } from 'lucide-react'
+import { HeroScene3DLoader } from '@/components/landing/HeroScene3DLoader'
 
 export default function Home() {
   return (
@@ -152,34 +153,18 @@ export default function Home() {
                 </svg>
               </div>
 
-              {/* 3D Viewport panel */}
-              <div className="relative hidden flex-1 bg-[hsl(var(--muted))]/20 lg:block">
-                <div className="absolute left-3 top-3 flex items-center gap-2 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-2.5 py-1.5 text-xs font-medium">
+              {/* 3D Viewport panel — 실제 Three.js 인터랙티브 씬 */}
+              <div className="relative hidden flex-1 overflow-hidden bg-gradient-to-br from-[hsl(var(--muted))]/30 to-[hsl(var(--background))] lg:block">
+                <div className="absolute left-3 top-3 z-10 flex items-center gap-2 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--card))]/90 px-2.5 py-1.5 text-xs font-medium backdrop-blur-sm">
                   <Box className="h-3.5 w-3.5 text-[hsl(var(--primary))]" />
-                  3D 뷰
+                  3D 뷰 (인터랙티브)
                 </div>
-                {/* Isometric room representation */}
-                <svg className="absolute inset-0 h-full w-full" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid meet">
-                  {/* Floor */}
-                  <polygon points="80,180 200,240 320,180 200,120" fill="hsl(var(--muted))" stroke="hsl(var(--border))" strokeWidth="1" />
-                  {/* Left wall */}
-                  <polygon points="80,80 80,180 200,240 200,140" fill="hsl(var(--card))" stroke="hsl(var(--border))" strokeWidth="1" />
-                  {/* Right wall */}
-                  <polygon points="320,80 320,180 200,240 200,140" fill="hsl(var(--secondary))" stroke="hsl(var(--border))" strokeWidth="1" />
-                  {/* Ceiling edge */}
-                  <polygon points="80,80 200,140 320,80 200,20" fill="none" stroke="hsl(var(--border))" strokeWidth="1" strokeDasharray="4 2" />
-                  {/* Simple furniture: sofa */}
-                  <rect x="110" y="148" width="50" height="22" rx="3" fill="hsl(var(--primary))" opacity="0.5" />
-                  <rect x="108" y="142" width="54" height="10" rx="3" fill="hsl(var(--primary))" opacity="0.7" />
-                  {/* Simple furniture: table */}
-                  <ellipse cx="230" cy="175" rx="22" ry="12" fill="hsl(var(--muted-foreground))" opacity="0.4" />
-                  {/* Window on left wall */}
-                  <rect x="100" y="100" width="40" height="28" rx="2" fill="hsl(var(--primary))" opacity="0.2" stroke="hsl(var(--primary))" strokeWidth="1" />
-                </svg>
+                {/* 실제 Three.js 평면도 씬 */}
+                <HeroScene3DLoader />
                 {/* Camera controls hint */}
-                <div className="absolute bottom-3 right-3 flex gap-1">
-                  {['궤도', '이동', '줌'].map(label => (
-                    <div key={label} className="rounded border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-2 py-0.5 text-[10px] text-[hsl(var(--muted-foreground))]">
+                <div className="absolute bottom-3 right-3 z-10 flex gap-1">
+                  {['드래그', '줌', '회전'].map(label => (
+                    <div key={label} className="rounded border border-[hsl(var(--border))] bg-[hsl(var(--card))]/80 px-2 py-0.5 text-[10px] text-[hsl(var(--muted-foreground))] backdrop-blur-sm">
                       {label}
                     </div>
                   ))}

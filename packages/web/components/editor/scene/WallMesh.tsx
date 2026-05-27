@@ -1,18 +1,21 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState, useRef } from 'react'
 import {
   MeshStandardMaterial,
   BufferGeometry,
   BoxGeometry,
   Matrix4,
   Float32BufferAttribute,
+  Mesh,
 } from 'three'
+import { useFrame } from '@react-three/fiber'
 import type { WallMeshData, BoxSegment } from '@spaceplanner/engine'
 
 // Shared materials — created once, never mutated
-const MAT_NORMAL = new MeshStandardMaterial({ color: '#e8e8e8' })
-const MAT_SELECTED = new MeshStandardMaterial({ color: '#4a90d9' })
+const MAT_NORMAL = new MeshStandardMaterial({ color: '#e8e8e8', emissive: '#000000', emissiveIntensity: 0 })
+const MAT_SELECTED = new MeshStandardMaterial({ color: '#4a90d9', emissive: '#4a90d9', emissiveIntensity: 0.15 })
+const MAT_HOVER = new MeshStandardMaterial({ color: '#f0f0f0', emissive: '#ffffff', emissiveIntensity: 0.06 })
 // Low-poly LOD material (flatShading for distant view)
 const MAT_NORMAL_LOW = new MeshStandardMaterial({ color: '#e8e8e8', flatShading: true })
 
@@ -95,18 +98,55 @@ function MergedWallSegments({
     [segments]
   )
 
-  const material = isSelected
-    ? MAT_SELECTED
-    : lod === 'low'
-    ? MAT_NORMAL_LOW
-    : MAT_NORMAL
+  const [hovered, setHovered] = useState(false)
+  const meshRef = useRef<Mesh>(null)
+
+  // Smooth emissive intensity interpolation
+  useFrame((_, delta) => {
+    const mesh = meshRef.current
+    if (!mesh) return
+    const mat = mesh.material as MeshStandardMaterial
+    if (!mat || !('emissiveIntensity' in mat)) return
+
+    const targetIntensity = isSelected ? 0.15 : hovered ? 0.06 : 0
+    const currentIntensity = mat.emissiveIntensity
+    if (Math.abs(currentIntensity - targetIntensity) > 0.001) {
+      mat.emissiveIntensity += (targetIntensity - currentIntensity) * Math.min(delta * 10, 1)
+      mat.needsUpdate = false // emissiveIntensity 변경은 needsUpdate 불필요
+    }
+  })
+
+  // lod=low 이면 hover 효과 스킵
+  if (lod === 'low') {
+    return (
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      <mesh
+        geometry={mergedGeo as any}
+        material={MAT_NORMAL_LOW as any}
+        castShadow={false}
+        receiveShadow
+        onClick={
+          onClick
+            ? (e: { stopPropagation: () => void }) => { e.stopPropagation(); onClick() }
+            : undefined
+        }
+      />
+    )
+  }
+
+  // high/medium: per-instance material for hover/select state
+  const baseMat = isSelected ? MAT_SELECTED : hovered ? MAT_HOVER : MAT_NORMAL
 
   return (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     <mesh
-      geometry={mergedGeo}
-      material={material}
-      castShadow={lod !== 'low'}
+      ref={meshRef as any}
+      geometry={mergedGeo as any}
+      material={baseMat as any}
+      castShadow
       receiveShadow
+      onPointerEnter={(e) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = 'pointer' }}
+      onPointerLeave={() => { setHovered(false); document.body.style.cursor = 'default' }}
       onClick={
         onClick
           ? (e: { stopPropagation: () => void }) => {

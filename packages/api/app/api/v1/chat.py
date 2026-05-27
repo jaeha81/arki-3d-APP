@@ -29,12 +29,18 @@ from app.services.ai.consultation_agent import (
 router = APIRouter(prefix="/chat", tags=["chat"])
 
 PLAN_CREDIT_LIMITS: dict[str, int] = {
-    "free":       5,
+    "free":       10,   # Phase 4: 월 10회 (이전 5 → 10으로 정상화)
     "starter":    50,
     "studio":     50,
     "pro":        300,
     "firm":       300,
     "enterprise": 9999,
+}
+
+PLAN_UPGRADE_LINKS: dict[str, str] = {
+    "free":    "/pricing?from=free",
+    "starter": "/pricing?from=starter",
+    "studio":  "/pricing?from=studio",
 }
 
 
@@ -53,6 +59,8 @@ async def _get_monthly_credits_used(db: AsyncSession, user_id: uuid.UUID) -> int
 async def _log_ai_usage(db, user_id, project_id, credits, ai_result) -> None:
     if ai_result is None:
         return
+    # 캐시 히트 시 크레딧 차감 없음
+    actual_credits = 0 if getattr(ai_result, "cached", False) else credits
     log = AIUsageLog(
         user_id=user_id,
         request_type=ai_result.request_type,
@@ -60,11 +68,13 @@ async def _log_ai_usage(db, user_id, project_id, credits, ai_result) -> None:
         input_tokens=ai_result.input_tokens,
         output_tokens=ai_result.output_tokens,
         estimated_cost_usd=ai_result.estimated_cost_usd,
-        credits_charged=credits,
+        credits_charged=actual_credits,
+        cached=getattr(ai_result, "cached", False),
         project_id=project_id,
     )
     db.add(log)
     await db.flush()
+    return actual_credits
 
 
 async def _check_and_get_limit(
@@ -79,9 +89,17 @@ async def _check_and_get_limit(
     monthly_limit = PLAN_CREDIT_LIMITS.get(str(plan_name), 5)
     credits_this_month = await _get_monthly_credits_used(db, user.id)
     if monthly_limit != 9999 and credits_this_month >= monthly_limit:
+        upgrade_url = PLAN_UPGRADE_LINKS.get(str(plan_name), "/pricing")
         raise HTTPException(
             status_code=429,
-            detail=f"월 AI 크레딧({monthly_limit}회)을 모두 사용했습니다. 플랜을 업그레이드하거나 다음 달을 기다려주세요.",
+            detail={
+                "code": "CREDIT_EXHAUSTED",
+                "message": f"월 AI 크레딧({monthly_limit}회)을 모두 사용했습니다.",
+                "plan": str(plan_name),
+                "monthly_limit": monthly_limit,
+                "upgrade_url": upgrade_url,
+                "hint": "Pro 플랜으로 업그레이드하면 월 300회 이용할 수 있습니다.",
+            },
         )
     return monthly_limit, credits_this_month
 
@@ -102,7 +120,12 @@ async def send_message(
 
     actions: list[ChatAction] = []
     images: list[str] = []
-    credits_used = 1
+
+    # 캐시 히트 여부 추적
+    is_cached = getattr(intent_ai, "cached", False)
+
+    # 캐시 히트 시 크레딧 0, 미스 시 1
+    credits_used = 0 if is_cached else 1
 
     await _log_ai_usage(db, current_user.id, body.project_id, 1, intent_ai)
 
@@ -212,6 +235,7 @@ async def send_message(
         credits_used=credits_used,
         credits_remaining=remaining,
         message_id=str(uuid.uuid4()),
+        cached=is_cached,
     )
 
 
