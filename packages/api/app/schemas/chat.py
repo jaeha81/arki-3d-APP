@@ -74,6 +74,7 @@ class ChatAction(BaseModel):
     images: Optional[list[str]] = None
     concept: Optional[ConceptProposal] = None
     estimate_draft: Optional[EstimateDraft] = None
+    share_url: Optional[str] = None
 
 
 class MessageRequest(BaseModel):

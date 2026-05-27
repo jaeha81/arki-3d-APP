@@ -113,7 +113,9 @@ async def send_message(
     monthly_limit, credits_this_month = await _check_and_get_limit(db, current_user)
 
     project_context: dict = {"floor_plan": body.floor_plan_data or {}}
-    intent_result, intent_ai = await analyze_intent(body.message, project_context)
+    recent_messages = await get_history(db, str(body.project_id), str(current_user.id), limit=6)
+    chat_history = [{"role": m.role.value, "content": m.content} for m in recent_messages]
+    intent_result, intent_ai = await analyze_intent(body.message, project_context, chat_history)
     intent = intent_result.get("intent", "general")
     params: dict = intent_result.get("params", {})
     reply: str = intent_result.get("reply_preview", "")
@@ -209,6 +211,68 @@ async def send_message(
                 reply = reply or "견적 초안을 생성했습니다."
         else:
             reply = reply or "견적 초안을 준비하지 못했습니다."
+
+    elif intent == "budget_optimize":
+        credits_used = 2
+        est_data, est_ai = await generate_quick_estimate(
+            message=body.message,
+            room_type=params.get("room_type", "거실"),
+            area_m2=params.get("area_m2"),
+            budget=params.get("budget"),
+        )
+        await _log_ai_usage(db, current_user.id, body.project_id, 1, est_ai)
+        if est_data:
+            from app.schemas.chat import EstimateDraft, EstimateLineItem
+            try:
+                items = [EstimateLineItem(**i) for i in est_data.get("breakdown", [])]
+                draft = EstimateDraft(
+                    room_type=est_data.get("room_type", "거실"),
+                    area_m2=est_data.get("area_m2"),
+                    breakdown=items,
+                    subtotal=est_data.get("subtotal", 0),
+                    margin_rate=est_data.get("margin_rate", 0.12),
+                    total=est_data.get("total", 0),
+                    notes=est_data.get("notes"),
+                )
+                actions.append(ChatAction(type="quick_estimate", estimate_draft=draft))
+                total_str = f"{draft.total:,}원"
+                reply = reply or f"예산에 맞게 최적화한 견적: 총 {total_str}입니다."
+            except Exception:
+                reply = reply or "예산 최적화 견적을 준비하지 못했습니다."
+        else:
+            reply = reply or "예산 최적화 견적을 준비하지 못했습니다."
+
+    elif intent == "share":
+        credits_used = 0
+        from app.models.estimate import ShareLink
+        from sqlalchemy import select as sa_select
+        project_uuid_share = uuid.UUID(body.project_id)
+        share_result = await db.execute(
+            sa_select(ShareLink).where(
+                ShareLink.project_id == project_uuid_share,
+                ShareLink.is_active == True,  # noqa: E712
+            )
+        )
+        existing_link = share_result.scalar_one_or_none()
+        if existing_link:
+            share_url = f"/share/{existing_link.token}"
+        else:
+            import secrets
+            token = secrets.token_urlsafe(24)[:32]
+            new_link = ShareLink(project_id=project_uuid_share, token=token)
+            db.add(new_link)
+            await db.flush()
+            share_url = f"/share/{token}"
+        actions.append(ChatAction(type="share_link", share_url=share_url))
+        reply = reply or f"공유 링크가 생성되었습니다: {share_url}"
+
+    elif intent == "modify_object":
+        credits_used = 1
+        reply = reply or (
+            params.get("reply_preview")
+            or "수정하려는 가구를 3D 화면에서 직접 선택해 속성 패널에서 변경하거나, "
+               "더 구체적으로 설명해 주세요. (예: '소파를 파란색으로 바꿔줘')"
+        )
 
     elif not reply:
         reply = "무엇을 도와드릴까요? '모던하게 꾸며줘', '견적 뽑아줘', 또는 사진을 올려주세요."

@@ -2,17 +2,21 @@ import json
 import os
 import httpx
 from anthropic import AsyncAnthropic
+from app.services.ai.ai_router import MODELS
 
 client = AsyncAnthropic(api_key=os.getenv("ANTHROPIC_API_KEY", ""))
 STABILITY_API_KEY = os.getenv("STABILITY_API_KEY", "")
 
+_VISION_SYSTEM = "당신은 인테리어 공간 분석 전문가입니다. 사진을 분석해 JSON만 반환합니다."
+
 
 async def analyze_photo(image_url: str) -> dict:
-    """Claude Vision으로 사진 분석"""
+    """Claude Vision으로 사진 분석 (현재 모델 기준, prompt caching 적용)"""
     try:
         response = await client.messages.create(
-            model="claude-3-5-sonnet-20241022",
+            model=MODELS["sonnet"],
             max_tokens=500,
+            system=[{"type": "text", "text": _VISION_SYSTEM, "cache_control": {"type": "ephemeral"}}],
             messages=[
                 {
                     "role": "user",

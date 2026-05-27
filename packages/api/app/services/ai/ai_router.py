@@ -3,6 +3,8 @@
 Phase 4 추가:
 - 스마트 모델 선택: 메시지 복잡도 기반 자동 업그레이드
 - 캐싱 레이어: in-memory dict (TTL 1시간), Redis 없어도 동작
+- Prompt Caching: Anthropic cache_control으로 시스템 프롬프트 비용 절감
+- Streaming: call_stream()으로 실시간 토큰 스트리밍 지원
 """
 from __future__ import annotations
 
@@ -10,6 +12,7 @@ import hashlib
 import json
 import os
 import time
+from collections.abc import AsyncGenerator
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -168,7 +171,7 @@ async def call(
     response = await client.messages.create(
         model=model,
         max_tokens=max_tokens,
-        system=system,
+        system=[{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
         messages=messages,
     )
 
@@ -222,3 +225,28 @@ async def call_json(
         return json.loads(text), result
     except Exception:
         return {}, result
+
+
+async def call_stream(
+    request_type: str,
+    system: str,
+    messages: list[dict[str, Any]],
+    max_tokens: int = 1000,
+    user_message: str | None = None,
+) -> AsyncGenerator[str, None]:
+    """스트리밍 모드로 모델을 호출해 텍스트 청크를 순서대로 yield한다.
+
+    캐싱 불가 (스트리밍은 캐시 키 사용 안 함). Prompt Caching은 적용.
+    Usage:
+        async for chunk in call_stream(...):
+            yield f"data: {chunk}\n\n"
+    """
+    model = select_model(request_type, user_message)
+    async with client.messages.stream(
+        model=model,
+        max_tokens=max_tokens,
+        system=[{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
+        messages=messages,
+    ) as stream:
+        async for text in stream.text_stream:
+            yield text

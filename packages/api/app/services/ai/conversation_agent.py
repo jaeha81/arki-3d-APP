@@ -26,21 +26,37 @@ JSON으로만 응답:
 {"intent": "concept_proposal", "params": {"style": "모던", "room_type": "거실", "area_m2": null, "budget": null}, "reply_preview": "..."}"""
 
 
-async def analyze_intent(message: str, project_context: dict) -> tuple[dict, "ai_router.AIResult | None"]:
+async def analyze_intent(
+    message: str,
+    project_context: dict,
+    chat_history: list[dict] | None = None,
+) -> tuple[dict, "ai_router.AIResult | None"]:
     """사용자 메시지 의도 분석. (결과 dict, AIResult) 반환.
 
     Phase 4: user_message를 ai_router에 전달해 복잡도 기반 스마트 모델 선택 지원.
+    chat_history: 최근 대화 목록 [{"role": "user"|"assistant", "content": "..."}].
+                  전달 시 이전 맥락을 반영해 더 정확한 의도 분석.
     """
     try:
+        # 최근 6턴 히스토리만 포함 (토큰 절약)
+        history_messages: list[dict] = []
+        if chat_history:
+            for h in chat_history[-6:]:
+                role = h.get("role", "user")
+                content = h.get("content", "")
+                if role in ("user", "assistant") and content:
+                    history_messages.append({"role": role, "content": content})
+
+        # 현재 메시지를 마지막에 추가
+        history_messages.append({
+            "role": "user",
+            "content": f"프로젝트: {json.dumps(project_context, ensure_ascii=False)}\n\n메시지: {message}",
+        })
+
         data, result = await ai_router.call_json(
             request_type="analyze_intent",
             system=SYSTEM_PROMPT,
-            messages=[
-                {
-                    "role": "user",
-                    "content": f"프로젝트: {json.dumps(project_context, ensure_ascii=False)}\n\n메시지: {message}",
-                }
-            ],
+            messages=history_messages,
             max_tokens=500,
             user_message=message,
         )
