@@ -1,14 +1,26 @@
 'use client'
 
-import { useMemo, Suspense, useRef, useCallback } from 'react'
+import { useMemo, Suspense, useRef, useCallback, useEffect } from 'react'
 import { Canvas, useThree, useFrame } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
+import { OrbitControls, GizmoHelper, GizmoViewcube, Environment } from '@react-three/drei'
 import type { FloorPlan } from '@spaceplanner/engine'
 import { buildScene } from '@spaceplanner/engine'
 import { WallMesh } from './scene/WallMesh'
 import { FloorMesh } from './scene/FloorMesh'
 import { FurnitureMesh } from './scene/FurnitureMesh'
 import { SceneGrid } from './scene/SceneGrid'
+import { CameraController } from './scene/CameraController'
+import { useEditorStore } from '@/lib/stores/editor-store'
+import type { EnvPreset } from '@/lib/stores/editor-store'
+import * as THREE from 'three'
+
+const ENV_MAP: Record<EnvPreset, React.ComponentProps<typeof Environment>['preset']> = {
+  studio: 'studio',
+  forest: 'forest',
+  city: 'city',
+  sunset: 'sunset',
+  night: 'night',
+}
 
 interface ThreeViewer3DProps {
   floorPlan: FloorPlan | null
@@ -19,6 +31,101 @@ interface ThreeViewer3DProps {
 // LOD 거리 임계값 (Three.js 단위 기준)
 const LOD_HIGH_DISTANCE = 8000
 const LOD_MED_DISTANCE = 20000
+
+// 카메라 진입 애니메이션 — 씬 첫 로드 시 위에서 아래로 내려오는 Spring 효과
+function useCameraEntryAnimation() {
+  const { camera, invalidate } = useThree()
+  const startRef = useRef(false)
+  const progressRef = useRef(0)
+  const startPosRef = useRef<THREE.Vector3 | null>(null)
+  const endPosRef = useRef<THREE.Vector3 | null>(null)
+
+  useEffect(() => {
+    if (startRef.current) return
+    startRef.current = true
+    // 시작: 위에서 2배 높이, 끝: 정규 카메라 위치
+    startPosRef.current = new THREE.Vector3(0, 14000, 8000)
+    endPosRef.current = new THREE.Vector3(0, 5000, 8000)
+    camera.position.set(0, 14000, 8000)
+    invalidate()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useFrame((_, delta) => {
+    if (!startPosRef.current || !endPosRef.current) return
+    if (progressRef.current >= 1) return
+
+    // Spring-like easing: exponential ease-out
+    progressRef.current = Math.min(progressRef.current + delta * 1.2, 1)
+    const t = 1 - Math.pow(1 - progressRef.current, 3)
+
+    camera.position.lerpVectors(startPosRef.current, endPosRef.current, t)
+    invalidate()
+  })
+}
+
+// 선택된 오브젝트로 카메라가 부드럽게 포커스 이동
+function useCameraFocusOnSelect(
+  selectedId: string | null | undefined,
+  floorPlan: FloorPlan | null,
+) {
+  const { camera, invalidate } = useThree()
+  const prevSelectedRef = useRef<string | null | undefined>(null)
+  const targetRef = useRef<THREE.Vector3 | null>(null)
+  const lerpProgressRef = useRef(1)
+
+  useEffect(() => {
+    if (selectedId === prevSelectedRef.current) return
+    prevSelectedRef.current = selectedId
+
+    if (!selectedId || !floorPlan) return
+
+    // 선택된 ID로 위치 추정 (wall segments or furniture position)
+    const sceneData = buildScene(floorPlan)
+    const wall = sceneData.walls.find(w => w.id === selectedId)
+    const furniture = sceneData.furniture.find(f => f.id === selectedId)
+
+    let focusPos: [number, number, number] | null = null
+
+    if (wall && wall.segments.length > 0) {
+      const seg = wall.segments[0]
+      focusPos = seg.position
+    } else if (furniture) {
+      focusPos = furniture.position
+    }
+
+    if (!focusPos) return
+
+    // 현재 카메라 방향을 유지하면서 target 오프셋으로 이동
+    const offset = new THREE.Vector3(focusPos[0], focusPos[1] + 2000, focusPos[2] + 5000)
+    targetRef.current = offset
+    lerpProgressRef.current = 0
+    invalidate()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId])
+
+  useFrame((_, delta) => {
+    if (!targetRef.current || lerpProgressRef.current >= 1) return
+
+    lerpProgressRef.current = Math.min(lerpProgressRef.current + delta * 2.5, 1)
+    const t = 1 - Math.pow(1 - lerpProgressRef.current, 3)
+
+    camera.position.lerp(targetRef.current, t * 0.04)
+    invalidate()
+  })
+}
+
+function CameraAnimations({
+  selectedId,
+  floorPlan,
+}: {
+  selectedId?: string | null
+  floorPlan: FloorPlan | null
+}) {
+  useCameraEntryAnimation()
+  useCameraFocusOnSelect(selectedId, floorPlan)
+  return null
+}
 
 /** 카메라 거리에 따라 LOD 레벨 반환: 'high' | 'medium' | 'low' */
 function useCameraLod(): 'high' | 'medium' | 'low' {
@@ -52,6 +159,7 @@ function SceneContent({
 
   return (
     <>
+      <CameraAnimations selectedId={selectedId} floorPlan={floorPlan} />
       {sceneData.walls.map(wallData => (
         <WallMesh
           key={wallData.id}
@@ -91,8 +199,9 @@ export function ThreeViewer3D({
   selectedId,
   onSelect,
 }: ThreeViewer3DProps) {
-  // 인터랙션 없을 때 frameloop="demand"로 RAF 일시중단 (Canvas 레벨에서 이미 처리)
-  // OrbitControls change → invalidate() 자동 호출됨
+  const controlsRef = useRef<{ target: THREE.Vector3; update: () => void } | null>(null)
+  const showEnvironment = useEditorStore(s => s.showEnvironment)
+  const envPreset = useEditorStore(s => s.envPreset)
   const handlePointerMissed = useCallback(() => onSelect?.(null), [onSelect])
 
   return (
@@ -111,10 +220,10 @@ export function ThreeViewer3D({
         camera={{ position: [0, 5000, 8000], fov: 45, near: 10, far: 100000 }}
         onPointerMissed={handlePointerMissed}
       >
-        <ambientLight intensity={0.4} />
+        <ambientLight intensity={showEnvironment ? 0.2 : 0.4} />
         <directionalLight
           position={[5000, 8000, 3000]}
-          intensity={0.8}
+          intensity={showEnvironment ? 0.5 : 0.8}
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
@@ -124,6 +233,11 @@ export function ThreeViewer3D({
           shadow-camera-top={10000}
           shadow-camera-bottom={-10000}
         />
+
+        {/* Environment HDRI lighting */}
+        {showEnvironment && (
+          <Environment preset={ENV_MAP[envPreset]} background={false} />
+        )}
 
         <SceneGrid showGrid />
 
@@ -139,16 +253,24 @@ export function ThreeViewer3D({
           )}
         </Suspense>
 
+        {/* Spline-style camera preset animation controller */}
+        <CameraController controlsRef={controlsRef} />
+
         <OrbitControls
+          ref={controlsRef as React.Ref<{ target: THREE.Vector3; update: () => void }>}
           makeDefault
           target={[0, 0, 0]}
           maxPolarAngle={Math.PI / 2}
           minDistance={500}
           maxDistance={50000}
-          // 컨트롤 변경 시 한 프레임 강제 렌더 (frameloop="demand"와 조화)
           enableDamping
           dampingFactor={0.08}
         />
+
+        {/* Spline-style navigation cube — top-right corner */}
+        <GizmoHelper alignment="top-right" margin={[72, 72]}>
+          <GizmoViewcube />
+        </GizmoHelper>
       </Canvas>
 
       {!floorPlan && (

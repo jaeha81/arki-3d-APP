@@ -2,6 +2,9 @@ import { create } from 'zustand'
 import type { ViewMode, EditorTool, EditorSelection } from '@/types/editor'
 import type { FurnishVariant } from '@/types/chat'
 
+export type EnvPreset = 'studio' | 'forest' | 'city' | 'sunset' | 'night'
+export type CameraPreset3D = 'iso' | 'top' | 'front' | 'right'
+
 interface EditorState {
   viewMode: ViewMode
   activeTool: EditorTool
@@ -18,6 +21,9 @@ interface EditorState {
   showDimensions: boolean
   pendingVariants: FurnishVariant[]
   selectedVariantIndex: number | null
+  envPreset: EnvPreset
+  cameraPreset3D: CameraPreset3D
+  showEnvironment: boolean
 
   setViewMode: (mode: ViewMode) => void
   setActiveTool: (tool: EditorTool) => void
@@ -34,6 +40,9 @@ interface EditorState {
   setPendingVariants: (variants: FurnishVariant[]) => void
   setSelectedVariant: (index: number | null) => void
   applyVariant: (index: number) => void
+  setEnvPreset: (preset: EnvPreset) => void
+  setCameraPreset3D: (preset: CameraPreset3D) => void
+  toggleEnvironment: () => void
 }
 
 export const useEditorStore = create<EditorState>()(set => ({
@@ -52,6 +61,9 @@ export const useEditorStore = create<EditorState>()(set => ({
   showDimensions: true,
   pendingVariants: [],
   selectedVariantIndex: null,
+  envPreset: 'studio',
+  cameraPreset3D: 'iso',
+  showEnvironment: false,
 
   setViewMode: mode => set({ viewMode: mode }),
   setActiveTool: tool => set({ activeTool: tool }),
@@ -76,4 +88,7 @@ export const useEditorStore = create<EditorState>()(set => ({
       }
       return { selectedVariantIndex: index, isDirty: true }
     }),
+  setEnvPreset: preset => set({ envPreset: preset }),
+  setCameraPreset3D: preset => set({ cameraPreset3D: preset }),
+  toggleEnvironment: () => set(s => ({ showEnvironment: !s.showEnvironment })),
 }))
