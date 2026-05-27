@@ -1,5 +1,5 @@
 import { apiClient } from './client'
-import type { Subscription, PlanInfo, AdminStats, AdminUser } from '@/types/subscription'
+import type { Subscription, PlanInfo, AdminStats, AdminUser, AIStatsDetail } from '@/types/subscription'
 
 export const subscriptionApi = {
   getMySubscription: async (): Promise<Subscription> => {
@@ -20,6 +20,11 @@ export const subscriptionApi = {
   // Admin
   getAdminStats: async (): Promise<AdminStats> => {
     const res = await apiClient.get<{ data: AdminStats }>('/admin/stats')
+    return res.data
+  },
+
+  getAdminAIStats: async (): Promise<AIStatsDetail> => {
+    const res = await apiClient.get<{ data: AIStatsDetail }>('/admin/ai-stats')
     return res.data
   },
 

@@ -1,8 +1,5 @@
 import json
-import os
-from anthropic import AsyncAnthropic
-
-client = AsyncAnthropic(api_key=os.getenv("ANTHROPIC_API_KEY", ""))
+from app.services.ai import ai_router
 
 SYSTEM_PROMPT = """당신은 인테리어 디자인 AI 어시스턴트입니다.
 사용자의 메시지를 분석하여 의도(intent)를 파악하세요.
@@ -20,12 +17,11 @@ JSON으로만 응답:
 {"intent": "auto_furnish", "params": {"style": "모던", "room": "거실", "budget": null}, "reply_preview": "..."}"""
 
 
-async def analyze_intent(message: str, project_context: dict) -> dict:
-    """사용자 메시지 의도 분석"""
+async def analyze_intent(message: str, project_context: dict) -> tuple[dict, "ai_router.AIResult | None"]:
+    """사용자 메시지 의도 분석. (결과 dict, AIResult) 반환."""
     try:
-        response = await client.messages.create(
-            model="claude-3-5-haiku-20241022",
-            max_tokens=500,
+        data, result = await ai_router.call_json(
+            request_type="analyze_intent",
             system=SYSTEM_PROMPT,
             messages=[
                 {
@@ -33,17 +29,10 @@ async def analyze_intent(message: str, project_context: dict) -> dict:
                     "content": f"프로젝트: {json.dumps(project_context, ensure_ascii=False)}\n\n메시지: {message}",
                 }
             ],
+            max_tokens=500,
         )
-        text = response.content[0].text.strip()
-        # JSON 파싱
-        if text.startswith("```"):
-            text = text.split("```")[1]
-            if text.startswith("json"):
-                text = text[4:]
-        return json.loads(text)
+        if data:
+            return data, result
+        return {"intent": "general", "params": {}, "reply_preview": "안녕하세요! 어떻게 도와드릴까요?"}, result
     except Exception:
-        return {
-            "intent": "general",
-            "params": {},
-            "reply_preview": "안녕하세요! 어떻게 도와드릴까요?",
-        }
+        return {"intent": "general", "params": {}, "reply_preview": "안녕하세요! 어떻게 도와드릴까요?"}, None

@@ -25,6 +25,25 @@ export interface AdminStats {
   free_users: number
   total_projects: number
   total_estimates: number
+  // AI 비용 통계
+  ai_calls_today?: number
+  ai_calls_this_month?: number
+  ai_cost_this_month_usd?: number
+  ai_cost_this_month_krw?: number
+}
+
+export interface ModelBreakdown {
+  model: string
+  call_count: number
+  total_cost_usd: number
+  total_input_tokens: number
+  total_output_tokens: number
+}
+
+export interface AIStatsDetail {
+  daily_calls: { date: string; count: number; cost_usd: number }[]
+  model_breakdown: ModelBreakdown[]
+  top_users: { user_id: string; email: string; credits_used: number; cost_usd: number }[]
 }
 
 export interface AdminUser {

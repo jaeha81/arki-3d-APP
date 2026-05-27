@@ -34,6 +34,13 @@ export function useAdminStats() {
   })
 }
 
+export function useAdminAIStats() {
+  return useQuery({
+    queryKey: ['admin', 'ai-stats'],
+    queryFn: subscriptionApi.getAdminAIStats,
+  })
+}
+
 export function useAdminUsers(limit?: number, offset?: number) {
   return useQuery({
     queryKey: ['admin', 'users', limit, offset],

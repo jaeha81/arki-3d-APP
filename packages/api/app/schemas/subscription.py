@@ -45,3 +45,23 @@ class AdminStatsResponse(BaseModel):
     free_users: int
     total_projects: int
     total_estimates: int
+    # AI 비용 통계
+    ai_calls_today: int = 0
+    ai_calls_this_month: int = 0
+    ai_cost_this_month_usd: float = 0.0
+    ai_cost_this_month_krw: int = 0  # USD × 1350 환율
+    failed_ai_requests: int = 0
+
+
+class AdminAIModelBreakdown(BaseModel):
+    model: str
+    call_count: int
+    total_cost_usd: float
+    total_input_tokens: int
+    total_output_tokens: int
+
+
+class AdminAIStatsDetail(BaseModel):
+    daily_calls: list[dict]          # [{date, count, cost_usd}]
+    model_breakdown: list[AdminAIModelBreakdown]
+    top_users: list[dict]            # [{user_id, email, credits_used, cost_usd}]
