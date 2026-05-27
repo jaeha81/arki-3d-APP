@@ -36,13 +36,20 @@ COST_PER_TOKEN: dict[str, tuple[float, float]] = {
 
 # ── 요청 유형 → 기본 모델 라우팅 ───────────────────────────────────────────
 ROUTING: dict[str, str] = {
+    # haiku: 단순·반복·빠른 응답
     "analyze_intent":       MODELS["haiku"],
     "estimate_draft":       MODELS["haiku"],
+    "quick_estimate":       MODELS["haiku"],
     "checklist_generate":   MODELS["haiku"],
     "consultation_summary": MODELS["haiku"],
+    # sonnet: 창의적·다단계 추론
+    "concept_proposal":     MODELS["sonnet"],
     "concept_suggest":      MODELS["sonnet"],
     "style_recommend":      MODELS["sonnet"],
     "placement_optimize":   MODELS["sonnet"],
+    "auto_furnish":         MODELS["sonnet"],
+    "photo_analysis":       MODELS["sonnet"],
+    # opus: 고복잡도 전략 분석
     "complex_analysis":     MODELS["opus"],
 }
 DEFAULT_MODEL = MODELS["haiku"]

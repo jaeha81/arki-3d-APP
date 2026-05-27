@@ -1,44 +1,38 @@
 import json
 import os
 import httpx
-from anthropic import AsyncAnthropic
-from app.services.ai.ai_router import MODELS
+from app.services.ai import ai_router
 
-client = AsyncAnthropic(api_key=os.getenv("ANTHROPIC_API_KEY", ""))
 STABILITY_API_KEY = os.getenv("STABILITY_API_KEY", "")
 
 _VISION_SYSTEM = "당신은 인테리어 공간 분석 전문가입니다. 사진을 분석해 JSON만 반환합니다."
+_VISION_PROMPT = '이 인테리어 사진을 분석해주세요. JSON으로만 응답: {"room_type":"거실","current_style":"미니멀","furniture":[],"wall_color":"화이트","floor_type":"원목","suggestions":""}'
 
 
 async def analyze_photo(image_url: str) -> dict:
-    """Claude Vision으로 사진 분석 (현재 모델 기준, prompt caching 적용)"""
+    """Claude Vision으로 사진 분석 — ai_router를 통해 모델 선택·비용 추적을 일원화한다."""
     try:
-        response = await client.messages.create(
-            model=MODELS["sonnet"],
-            max_tokens=500,
-            system=[{"type": "text", "text": _VISION_SYSTEM, "cache_control": {"type": "ephemeral"}}],
+        data, _ = await ai_router.call_json(
+            request_type="photo_analysis",
+            system=_VISION_SYSTEM,
             messages=[
                 {
                     "role": "user",
                     "content": [
-                        {
-                            "type": "image",
-                            "source": {"type": "url", "url": image_url},
-                        },
-                        {
-                            "type": "text",
-                            "text": '이 인테리어 사진을 분석해주세요. JSON으로만 응답: {"room_type":"거실","current_style":"미니멀","furniture":[],"wall_color":"화이트","floor_type":"원목","suggestions":""}',
-                        },
+                        {"type": "image", "source": {"type": "url", "url": image_url}},
+                        {"type": "text", "text": _VISION_PROMPT},
                     ],
                 }
             ],
+            max_tokens=500,
+            use_cache=False,  # 비전 응답은 캐싱 불가
         )
-        text = response.content[0].text.strip()
-        if text.startswith("```"):
-            text = text.split("```")[1]
-            if text.startswith("json"):
-                text = text[4:]
-        return json.loads(text)
+        return data or {
+            "room_type": "거실",
+            "current_style": "미니멀",
+            "furniture": [],
+            "suggestions": "",
+        }
     except Exception:
         return {
             "room_type": "거실",
@@ -53,7 +47,7 @@ async def generate_style_images(
 ) -> list[str]:
     """Stability AI로 스타일 이미지 생성 (URL 반환)"""
     if not STABILITY_API_KEY:
-        return []  # API 키 없으면 빈 목록
+        return []
 
     if styles is None:
         styles = ["modern minimalist", "Scandinavian", "classic", "natural warm"]

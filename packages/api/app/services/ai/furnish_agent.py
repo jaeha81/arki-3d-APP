@@ -1,8 +1,5 @@
 import json
-import os
-from anthropic import AsyncAnthropic
-
-client = AsyncAnthropic(api_key=os.getenv("ANTHROPIC_API_KEY", ""))
+from app.services.ai import ai_router
 
 FURNISH_SYSTEM = """당신은 인테리어 배치 전문가입니다.
 주어진 방 정보와 가구 목록으로 3가지 배치안을 JSON으로만 생성하세요.
@@ -24,28 +21,22 @@ async def generate_furnish_variants(
     available_assets: list[dict],
     budget: int | None = None,
 ) -> list[dict]:
-    """3가지 배치안 생성"""
-    try:
-        prompt = f"""스타일: {style}
+    """3가지 배치안 생성 — ai_router를 통해 모델 선택·비용 추적·캐싱을 일원화한다."""
+    prompt = f"""스타일: {style}
 예산: {budget or '제한없음'}원
 방 정보: {json.dumps(room_info, ensure_ascii=False)}
 사용가능 가구(상위 20개): {json.dumps(available_assets[:20], ensure_ascii=False)}"""
 
-        response = await client.messages.create(
-            model="claude-3-5-sonnet-20241022",
-            max_tokens=3000,
+    try:
+        data, _ = await ai_router.call_json(
+            request_type="auto_furnish",
             system=FURNISH_SYSTEM,
             messages=[{"role": "user", "content": prompt}],
+            max_tokens=3000,
+            user_message=style,
         )
-        text = response.content[0].text.strip()
-        if text.startswith("```"):
-            text = text.split("```")[1]
-            if text.startswith("json"):
-                text = text[4:]
-        data = json.loads(text)
         return data.get("variants", [])
     except Exception:
-        # fallback: 빈 배치안 3개
         return [
             {
                 "name": f"{style} {suffix}안",
