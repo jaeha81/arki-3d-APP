@@ -19,16 +19,63 @@ export interface FurnishVariant {
   estimated_cost?: number
 }
 
+export interface ColorSwatch {
+  name: string
+  hex: string
+  usage: string
+}
+
+export interface ConceptProposal {
+  concept_name: string
+  mood: string
+  color_palette: ColorSwatch[]
+  key_furniture: string[]
+  style_keywords: string[]
+  budget_range?: { min: number; max: number; currency: string } | null
+  summary: string
+}
+
+export interface EstimateLineItem {
+  category: string
+  unit_price?: number | null
+  estimated_qty?: string | null
+  total: number
+}
+
+export interface EstimateDraft {
+  room_type: string
+  area_m2?: number | null
+  breakdown: EstimateLineItem[]
+  subtotal: number
+  margin_rate: number
+  total: number
+  notes?: string | null
+}
+
+export interface ConsultationSummary {
+  title: string
+  agreed_style?: string | null
+  key_points: string[]
+  client_preferences?: Record<string, unknown> | null
+  estimate_draft?: EstimateDraft | null
+  next_actions: string[]
+  summary_text: string
+}
+
 export interface ChatAction {
   type:
     | 'auto_furnish'
     | 'restyle_photo'
     | 'modify_object'
+    | 'concept_proposal'
+    | 'quick_estimate'
     | 'estimate'
     | 'share'
     | 'general'
   variants?: FurnishVariant[]
   images?: string[]
+  concept?: ConceptProposal
+  estimate_draft?: EstimateDraft
 }
 
 export interface MessageRequest {
@@ -67,6 +114,14 @@ export interface UiMessage {
   content: string
   variants?: FurnishVariant[]
   images?: string[]
+  concept?: ConceptProposal
+  estimate_draft?: EstimateDraft
   isLoading?: boolean
   createdAt: Date
+}
+
+export interface ConsultationSummaryResponse {
+  summary: ConsultationSummary
+  credits_used: number
+  credits_remaining: number
 }

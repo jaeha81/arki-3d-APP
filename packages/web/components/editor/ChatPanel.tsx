@@ -1,14 +1,18 @@
 'use client'
 
 import { useRef, useEffect, useState, useCallback } from 'react'
-import { Paperclip, Send, X, Bot } from 'lucide-react'
+import { Paperclip, Send, X, Bot, FileText } from 'lucide-react'
+import { useMutation } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { useEditorStore } from '@/lib/stores/editor-store'
 import { useChat } from '@/lib/hooks/use-chat'
+import { chatApi } from '@/lib/api/chat'
 import { FurnishVariantCard } from './FurnishVariantCard'
 import { ImagePreviewGrid } from './ImagePreviewGrid'
+import { ConceptProposalCard } from './ConceptProposalCard'
+import { EstimateDraftCard } from './EstimateDraftCard'
 import { cn } from '@/lib/utils'
-import type { UiMessage } from '@/types/chat'
+import type { UiMessage, ConsultationSummary } from '@/types/chat'
 
 const WELCOME: UiMessage = {
   id: 'system-welcome',
@@ -35,9 +39,7 @@ function VariantBlock({ message }: VariantBlockProps) {
   const setPendingVariants = useEditorStore((s) => s.setPendingVariants)
   const applyVariant = useEditorStore((s) => s.applyVariant)
   const selectedVariantIndex = useEditorStore((s) => s.selectedVariantIndex)
-
   const [localSelected, setLocalSelected] = useState<number | null>(null)
-
   const variants = message.variants
   if (!variants || variants.length === 0) return null
 
@@ -46,7 +48,6 @@ function VariantBlock({ message }: VariantBlockProps) {
     setPendingVariants(variants)
     useEditorStore.getState().setSelectedVariant(index)
   }
-
   const handleApply = (index: number) => {
     setPendingVariants(variants)
     applyVariant(index)
@@ -68,20 +69,89 @@ function VariantBlock({ message }: VariantBlockProps) {
   )
 }
 
+interface SummaryModalProps {
+  summary: ConsultationSummary
+  onClose: () => void
+}
+
+function SummaryModal({ summary, onClose }: SummaryModalProps) {
+  return (
+    <div className="absolute inset-0 z-40 flex items-start justify-center bg-black/50 p-4 pt-8 overflow-y-auto">
+      <div className="w-full max-w-sm rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] shadow-2xl">
+        <div className="flex items-center justify-between border-b border-[hsl(var(--border))] px-4 py-3">
+          <h3 className="text-sm font-semibold text-[hsl(var(--foreground))]">{summary.title}</h3>
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onClose}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <div className="px-4 py-4 flex flex-col gap-4">
+          {summary.agreed_style && (
+            <div>
+              <p className="text-xs font-medium text-[hsl(var(--muted-foreground))] mb-1">합의 스타일</p>
+              <p className="text-sm font-semibold text-[hsl(var(--foreground))]">{summary.agreed_style}</p>
+            </div>
+          )}
+
+          {summary.key_points.length > 0 && (
+            <div>
+              <p className="text-xs font-medium text-[hsl(var(--muted-foreground))] mb-1.5">핵심 요점</p>
+              <ul className="flex flex-col gap-1">
+                {summary.key_points.map((pt, i) => (
+                  <li key={i} className="flex items-start gap-1.5 text-xs text-[hsl(var(--foreground))]">
+                    <span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-[hsl(var(--primary))] shrink-0" />
+                    {pt}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {summary.estimate_draft && (
+            <EstimateDraftCard draft={summary.estimate_draft} />
+          )}
+
+          {summary.next_actions.length > 0 && (
+            <div>
+              <p className="text-xs font-medium text-[hsl(var(--muted-foreground))] mb-1.5">다음 액션</p>
+              <ul className="flex flex-col gap-1">
+                {summary.next_actions.map((action, i) => (
+                  <li key={i} className="flex items-start gap-1.5 text-xs text-[hsl(var(--foreground))]">
+                    <span className="text-[hsl(var(--primary))]">→</span>
+                    {action}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <p className="text-xs text-[hsl(var(--muted-foreground))] leading-relaxed border-t border-[hsl(var(--border))] pt-3">
+            {summary.summary_text}
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function ChatPanel() {
   const isChatOpen = useEditorStore((s) => s.isChatOpen)
   const toggleChat = useEditorStore((s) => s.toggleChat)
-
   const { messages: apiMessages, sendMessage, isLoading } = useChat('current-project')
-
   const allMessages = [WELCOME, ...apiMessages]
 
   const [inputValue, setInputValue] = useState('')
+  const [summaryModal, setSummaryModal] = useState<ConsultationSummary | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [allMessages.length])
+
+  const summaryMutation = useMutation({
+    mutationFn: () => chatApi.getConsultationSummary('current-project'),
+    onSuccess: (data) => setSummaryModal(data.summary),
+  })
 
   const handleSend = useCallback(() => {
     const text = inputValue.trim()
@@ -107,15 +177,31 @@ export function ChatPanel() {
         isChatOpen ? 'translate-x-0' : 'translate-x-full',
       )}
     >
+      {summaryModal && (
+        <SummaryModal summary={summaryModal} onClose={() => setSummaryModal(null)} />
+      )}
+
       {/* 헤더 */}
       <div className="flex items-center justify-between border-b border-[hsl(var(--border))] px-3 py-2">
         <div className="flex items-center gap-2">
           <Bot className="h-4 w-4 text-[hsl(var(--primary))]" />
           <h3 className="text-sm font-semibold">AI 디자인 어시스턴트</h3>
         </div>
-        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={toggleChat}>
-          <X className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            title="상담 요약"
+            disabled={apiMessages.length === 0 || summaryMutation.isPending}
+            onClick={() => summaryMutation.mutate()}
+          >
+            <FileText className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={toggleChat}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       {/* 메시지 영역 */}
@@ -145,12 +231,37 @@ export function ChatPanel() {
                 {!msg.isLoading && msg.images && msg.images.length > 0 && (
                   <ImagePreviewGrid images={msg.images} title="생성된 이미지" />
                 )}
+
+                {!msg.isLoading && msg.concept && (
+                  <ConceptProposalCard concept={msg.concept} />
+                )}
+
+                {!msg.isLoading && msg.estimate_draft && (
+                  <EstimateDraftCard draft={msg.estimate_draft} />
+                )}
               </div>
             </div>
           ))}
           <div ref={messagesEndRef} />
         </div>
       </div>
+
+      {/* 빠른 제안 버튼 */}
+      {apiMessages.length === 0 && (
+        <div className="px-3 pb-2 flex flex-wrap gap-1.5">
+          {['컨셉 잡아줘', '견적 뽑아줘', '모던하게 꾸며줘'].map((suggestion) => (
+            <button
+              key={suggestion}
+              onClick={() => {
+                sendMessage(suggestion)
+              }}
+              className="rounded-full border border-[hsl(var(--border))] px-3 py-1 text-xs text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))] transition-colors"
+            >
+              {suggestion}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* 입력 영역 */}
       <div className="border-t border-[hsl(var(--border))] p-2">

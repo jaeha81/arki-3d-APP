@@ -36,6 +36,8 @@ export function useChat(projectId: string) {
           data.images.length > 0
             ? data.images
             : data.actions.find((a) => a.type === 'restyle_photo')?.images,
+        concept: data.actions.find((a) => a.type === 'concept_proposal')?.concept,
+        estimate_draft: data.actions.find((a) => a.type === 'quick_estimate')?.estimate_draft,
         createdAt: new Date(),
       }
       setMessages((prev) => prev.filter((m) => m.id !== 'loading').concat(aiMsg))
