@@ -15,6 +15,23 @@ function ProjectsContent() {
 
   const projects = projectsQuery.data?.data ?? []
 
+  if (projectsQuery.isError) {
+    return (
+      <main className="mx-auto max w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <DashboardHeader />
+        <div className="mt-16 flex flex-col items-center gap-4 text-center">
+          <p className="text-lg font-semibold text-red-500">프로젝트를 불러올 수 없습니다</p>
+          <p className="text-sm text-[hsl(var(--muted-foreground))]">
+            서버 연결에 실패했습니다. 로그인 세션이 만료됐거나 네트워크 오류일 수 있습니다.
+          </p>
+          <a href="/login" className="rounded-lg bg-[hsl(var(--primary))] px-5 py-2 text-sm font-medium text-white hover:opacity-90">
+            다시 로그인
+          </a>
+        </div>
+      </main>
+    )
+  }
+
   const recentCount = projects.filter((p: { updatedAt?: string; updated_at?: string }) => {
     const updatedAt = p.updatedAt ?? p.updated_at
     if (!updatedAt) return false

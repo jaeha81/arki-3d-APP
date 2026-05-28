@@ -20,15 +20,18 @@ from app.middleware.error_handler import http_exception_handler, validation_exce
 from app.middleware.logging_middleware import RequestLoggingMiddleware
 
 app = FastAPI(
-    title="SpacePlanner API",
+    title="JH-3D API",
     version="0.1.0",
     docs_url="/api/docs",
     redoc_url="/api/redoc",
 )
 
+# FRONTEND_URL은 쉼표 구분으로 여러 도메인 허용 (예: "https://arki-3d.vercel.app,http://localhost:3000")
+_allowed_origins = [o.strip() for o in settings.FRONTEND_URL.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL],
+    allow_origins=_allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

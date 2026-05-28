@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
-    DATABASE_URL: str = "postgresql+asyncpg://sp_user:sp_pass@localhost:5432/spaceplanner"
+    DATABASE_URL: str = "postgresql+asyncpg://jh_user:jh_pass@localhost:5432/jh3d"
     REDIS_URL: str = "redis://localhost:6379/0"
     JWT_SECRET: str = "dev-secret-change-in-production"
     JWT_ALGORITHM: str = "HS256"
@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     MINIO_ENDPOINT: str = "localhost:9000"
     MINIO_ACCESS_KEY: str = "minioadmin"
     MINIO_SECRET_KEY: str = "minioadmin123"
-    MINIO_BUCKET: str = "spaceplanner"
+    MINIO_BUCKET: str = "jh3d"
     FRONTEND_URL: str = "http://localhost:3000"
     ENVIRONMENT: str = "development"
     TOSS_CLIENT_KEY: str = "test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq"
