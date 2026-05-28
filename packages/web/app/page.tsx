@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { Box, Layers, Users, Calculator, Cloud, Moon, ChevronRight, Check, ArrowRight } from 'lucide-react'
-import { HeroScene3DLoader } from '@/components/landing/HeroScene3DLoader'
 
 export default function Home() {
   return (
@@ -99,7 +98,7 @@ export default function Home() {
                 <div className="h-3 w-3 rounded-full bg-emerald-400/70" />
               </div>
               <div className="ml-2 flex-1 max-w-[240px] rounded-md bg-[hsl(var(--background))] border border-[hsl(var(--border))] px-3 py-1 text-xs text-[hsl(var(--muted-foreground))]">
-                spaceplanner.app/editor/proj-001
+                jh-3d.app/editor/proj-001
               </div>
             </div>
 
@@ -153,17 +152,54 @@ export default function Home() {
                 </svg>
               </div>
 
-              {/* 3D Viewport panel — 실제 Three.js 인터랙티브 씬 */}
+              {/* 3D Viewport panel — isometric SVG mockup */}
               <div className="relative hidden flex-1 overflow-hidden bg-gradient-to-br from-[hsl(var(--muted))]/30 to-[hsl(var(--background))] lg:block">
                 <div className="absolute left-3 top-3 z-10 flex items-center gap-2 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--card))]/90 px-2.5 py-1.5 text-xs font-medium backdrop-blur-sm">
                   <Box className="h-3.5 w-3.5 text-[hsl(var(--primary))]" />
-                  3D 뷰 (인터랙티브)
+                  3D 뷰
                 </div>
-                {/* 실제 Three.js 평면도 씬 */}
-                <HeroScene3DLoader />
-                {/* Camera controls hint */}
+                {/* 정적 아이소메트릭 평면도 3D 목업 */}
+                <svg
+                  className="absolute inset-0 h-full w-full"
+                  viewBox="0 0 400 320"
+                  preserveAspectRatio="xMidYMid meet"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  {/* 바닥 */}
+                  <polygon points="200,260 340,180 200,100 60,180" fill="#f0efeb" stroke="#d8d6d2" strokeWidth="1" />
+                  {/* 바닥 그리드 라인 */}
+                  <line x1="200" y1="100" x2="200" y2="260" stroke="#e0deda" strokeWidth="0.5" />
+                  <line x1="130" y1="140" x2="270" y2="140" stroke="#e0deda" strokeWidth="0.5" />
+                  <line x1="95" y1="160" x2="305" y2="160" stroke="#e0deda" strokeWidth="0.5" />
+                  <line x1="130" y1="220" x2="270" y2="220" stroke="#e0deda" strokeWidth="0.5" />
+                  {/* 서쪽 벽 */}
+                  <polygon points="60,180 60,100 200,20 200,100" fill="#e8e6e2" stroke="#ccc" strokeWidth="1" />
+                  {/* 북쪽 벽 */}
+                  <polygon points="200,100 200,20 340,100 340,180" fill="#dddbd7" stroke="#ccc" strokeWidth="1" />
+                  {/* 내부 칸막이 (서쪽 벽면) */}
+                  <polygon points="200,180 200,120 130,160 130,220" fill="#d8d6d2" stroke="#bbb" strokeWidth="0.8" opacity="0.8" />
+                  {/* 소파 */}
+                  <polygon points="80,200 80,180 140,148 140,168" fill="#9b8466" stroke="#7a6448" strokeWidth="0.8" />
+                  <polygon points="80,200 140,168 140,175 80,207" fill="#8a7356" stroke="#7a6448" strokeWidth="0.8" />
+                  <polygon points="80,200 80,207 140,175 140,168" fill="#a08870" stroke="#7a6448" strokeWidth="0.8" />
+                  {/* 침대 */}
+                  <polygon points="255,145 255,120 310,90 310,115" fill="#b8b0a0" stroke="#999" strokeWidth="0.8" />
+                  <polygon points="255,145 310,115 310,122 255,152" fill="#a8a090" stroke="#999" strokeWidth="0.8" />
+                  <polygon points="255,145 255,152 310,122 310,115" fill="#c0b8a8" stroke="#999" strokeWidth="0.8" />
+                  {/* 창문 (서쪽 벽) */}
+                  <rect x="90" y="60" width="30" height="22" fill="#a8d4f0" opacity="0.7" stroke="#7ab4d8" strokeWidth="0.8" />
+                  <line x1="105" y1="60" x2="105" y2="82" stroke="#7ab4d8" strokeWidth="0.5" />
+                  <line x1="90" y1="71" x2="120" y2="71" stroke="#7ab4d8" strokeWidth="0.5" />
+                  {/* 창문 (북쪽 벽) */}
+                  <rect x="260" y="52" width="30" height="22" fill="#a8d4f0" opacity="0.7" stroke="#7ab4d8" strokeWidth="0.8" />
+                  <line x1="275" y1="52" x2="275" y2="74" stroke="#7ab4d8" strokeWidth="0.5" />
+                  <line x1="260" y1="63" x2="290" y2="63" stroke="#7ab4d8" strokeWidth="0.5" />
+                  {/* 테이블 */}
+                  <polygon points="155,195 155,182 195,160 195,173" fill="#c8b890" stroke="#a89870" strokeWidth="0.8" />
+                  <polygon points="155,195 195,173 195,178 155,200" fill="#b8a880" stroke="#a89870" strokeWidth="0.8" />
+                </svg>
                 <div className="absolute bottom-3 right-3 z-10 flex gap-1">
-                  {['드래그', '줌', '회전'].map(label => (
+                  {['아이소메트릭', '2D→3D 변환'].map(label => (
                     <div key={label} className="rounded border border-[hsl(var(--border))] bg-[hsl(var(--card))]/80 px-2 py-0.5 text-[10px] text-[hsl(var(--muted-foreground))] backdrop-blur-sm">
                       {label}
                     </div>
