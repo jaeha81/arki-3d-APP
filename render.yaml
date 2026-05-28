@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: arki3d-api
+    runtime: docker
+    dockerfilePath: packages/api/Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: FRONTEND_URL
+        value: https://arki-3d.vercel.app,http://localhost:3000
+      - key: ENVIRONMENT
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: TOSS_CLIENT_KEY
+        sync: false
+      - key: TOSS_SECRET_KEY
+        sync: false
+      - key: REDIS_URL
+        sync: false
