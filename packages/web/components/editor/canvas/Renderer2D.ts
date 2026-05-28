@@ -92,18 +92,21 @@ export class Renderer2D {
     const endX = startX + canvas.width / scale + gridSize
     const endY = startY + canvas.height / scale + gridSize
 
+    // 모든 수직선을 단일 path로 — ctx.stroke() 호출 수 N→1
+    ctx.beginPath()
     for (let x = startX; x <= endX; x += gridSize) {
-      ctx.beginPath()
       ctx.moveTo(x, startY)
       ctx.lineTo(x, endY)
-      ctx.stroke()
     }
+    ctx.stroke()
+
+    // 모든 수평선을 단일 path로
+    ctx.beginPath()
     for (let y = startY; y <= endY; y += gridSize) {
-      ctx.beginPath()
       ctx.moveTo(startX, y)
       ctx.lineTo(endX, y)
-      ctx.stroke()
     }
+    ctx.stroke()
 
     ctx.restore()
   }

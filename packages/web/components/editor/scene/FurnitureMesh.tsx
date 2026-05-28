@@ -64,7 +64,7 @@ function PlaceholderBox({
   const meshRef = useRef<Mesh>(null)
   const [hovered, setHovered] = useState(false)
 
-  // Smooth emissive interpolation
+  // Smooth emissive interpolation — 이미 목표값에 도달했으면 useFrame 작업 skip
   useFrame((_, delta) => {
     const mesh = meshRef.current
     if (!mesh) return
@@ -72,9 +72,8 @@ function PlaceholderBox({
     if (!mat || !('emissiveIntensity' in mat)) return
     const targetIntensity = isSelected ? 0.2 : isDragging ? 0.1 : hovered ? 0.08 : 0
     const current = mat.emissiveIntensity
-    if (Math.abs(current - targetIntensity) > 0.001) {
-      mat.emissiveIntensity += (targetIntensity - current) * Math.min(delta * 10, 1)
-    }
+    if (Math.abs(current - targetIntensity) <= 0.001) return
+    mat.emissiveIntensity += (targetIntensity - current) * Math.min(delta * 10, 1)
   })
 
   if (lod === 'low') {

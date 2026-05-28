@@ -28,6 +28,18 @@ interface WallMeshProps {
   lod?: LodLevel
 }
 
+// 동일 크기의 BoxGeometry를 재사용 — 세그먼트 수가 많을 때 GC 압력 감소
+const _boxGeoCache = new Map<string, BoxGeometry>()
+function getCachedBoxGeo(w: number, h: number, d: number): BoxGeometry {
+  const key = `${w}|${h}|${d}`
+  let geo = _boxGeoCache.get(key)
+  if (!geo) {
+    geo = new BoxGeometry(w, h, d)
+    _boxGeoCache.set(key, geo)
+  }
+  return geo
+}
+
 /**
  * 동일 재질 벽 세그먼트를 단일 BufferGeometry로 병합.
  * three.js BufferGeometry.merge() API를 직접 사용하여 외부 의존성 없이 구현.
@@ -46,7 +58,9 @@ function mergeBoxSegments(segments: BoxSegment[]): BufferGeometry {
 
   for (const seg of segments) {
     const [w, h, d] = seg.size
-    const geo = new BoxGeometry(w, h, d)
+    // 캐시에서 가져온 geo는 dispose하지 않음 — 공유 원본
+    const sourceGeo = getCachedBoxGeo(w, h, d)
+    const geo = sourceGeo.clone()
     _mat4.makeTranslation(seg.position[0], seg.position[1], seg.position[2])
     geo.applyMatrix4(_mat4)
 
@@ -101,7 +115,7 @@ function MergedWallSegments({
   const [hovered, setHovered] = useState(false)
   const meshRef = useRef<Mesh>(null)
 
-  // Smooth emissive intensity interpolation
+  // Smooth emissive intensity interpolation — 목표값 도달 시 early return
   useFrame((_, delta) => {
     const mesh = meshRef.current
     if (!mesh) return
@@ -110,10 +124,8 @@ function MergedWallSegments({
 
     const targetIntensity = isSelected ? 0.15 : hovered ? 0.06 : 0
     const currentIntensity = mat.emissiveIntensity
-    if (Math.abs(currentIntensity - targetIntensity) > 0.001) {
-      mat.emissiveIntensity += (targetIntensity - currentIntensity) * Math.min(delta * 10, 1)
-      mat.needsUpdate = false // emissiveIntensity 변경은 needsUpdate 불필요
-    }
+    if (Math.abs(currentIntensity - targetIntensity) <= 0.001) return
+    mat.emissiveIntensity += (targetIntensity - currentIntensity) * Math.min(delta * 10, 1)
   })
 
   // lod=low 이면 hover 효과 스킵
