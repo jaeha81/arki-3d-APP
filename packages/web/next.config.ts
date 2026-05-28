@@ -16,6 +16,11 @@ const nextConfig: NextConfig = {
       '@spaceplanner/engine': './lib/engine',
     },
   },
+
+  experimental: {
+    // drei/fiber named exports tree-shaking — 번들 크기 축소
+    optimizePackageImports: ['@react-three/drei', '@react-three/fiber'],
+  },
 }
 
 export default nextConfig

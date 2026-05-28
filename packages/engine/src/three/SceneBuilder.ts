@@ -8,6 +8,7 @@ import { WALL_DEFAULTS } from '../types/floor-plan'
 export interface BoxSegment {
   position: [number, number, number] // center X, Y, Z (mm)
   size: [number, number, number]     // width, height, depth (mm)
+  rotationY: number                  // 벽 방향 각도 (라디안) — 사선 벽 정렬용
 }
 
 /** 벽 메쉬 데이터 */
@@ -144,6 +145,7 @@ function buildWallSegments(
       {
         position: [cx, height / 2, cz],
         size: [wallLen, height, thickness],
+        rotationY: angle,
       },
     ]
   }
@@ -169,6 +171,7 @@ function buildWallSegments(
       segments.push({
         position: [segCX, height / 2, segCZ],
         size: [segLen, height, thickness],
+        rotationY: angle,
       })
     }
 
@@ -179,6 +182,7 @@ function buildWallSegments(
       segments.push({
         position: [segCX, opening.bottomY / 2, segCZ],
         size: [opening.width, opening.bottomY, thickness],
+        rotationY: angle,
       })
     }
 
@@ -190,6 +194,7 @@ function buildWallSegments(
       segments.push({
         position: [segCX, opening.topY + remainH / 2, segCZ],
         size: [opening.width, remainH, thickness],
+        rotationY: angle,
       })
     }
 
@@ -205,6 +210,7 @@ function buildWallSegments(
     segments.push({
       position: [segCX, height / 2, segCZ],
       size: [segLen, height, thickness],
+      rotationY: angle,
     })
   }
 

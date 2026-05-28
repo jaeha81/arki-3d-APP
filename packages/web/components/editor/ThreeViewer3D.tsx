@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, Suspense, useRef, useCallback, useEffect } from 'react'
+import { useMemo, Suspense, useRef, useCallback, useEffect, useState } from 'react'
 import { Canvas, useThree, useFrame } from '@react-three/fiber'
 import { OrbitControls, GizmoHelper, GizmoViewcube, Environment } from '@react-three/drei'
 import type { FloorPlan } from '@spaceplanner/engine'
@@ -128,11 +128,15 @@ function CameraAnimations({
   return null
 }
 
-/** 카메라 거리에 따라 LOD 레벨 반환: 'high' | 'medium' | 'low' */
+/**
+ * 카메라 거리에 따라 LOD 레벨 반환: 'high' | 'medium' | 'low'
+ * useState 사용 — ref는 React 재렌더를 트리거하지 않으므로 lod prop이 자식에 전달되지 않는 버그 수정
+ */
 function useCameraLod(): 'high' | 'medium' | 'low' {
-  const lodRef = useRef<'high' | 'medium' | 'low'>('high')
+  const [lod, setLod] = useState<'high' | 'medium' | 'low'>('high')
   const lastCheckRef = useRef(0)
-  const { camera, invalidate } = useThree()
+  const prevLodRef = useRef<'high' | 'medium' | 'low'>('high')
+  const { camera } = useThree()
 
   useFrame((_, __, xrFrame) => {
     // throttle: LOD_THROTTLE_MS마다 한 번만 거리 계산
@@ -143,13 +147,13 @@ function useCameraLod(): 'high' | 'medium' | 'low' {
     const dist = camera.position.length()
     const next: 'high' | 'medium' | 'low' =
       dist < LOD_HIGH_DISTANCE ? 'high' : dist < LOD_MED_DISTANCE ? 'medium' : 'low'
-    if (next !== lodRef.current) {
-      lodRef.current = next
-      invalidate()
+    if (next !== prevLodRef.current) {
+      prevLodRef.current = next
+      setLod(next) // React 재렌더 트리거 → WallMesh/FurnitureMesh에 lod prop 전달
     }
   })
 
-  return lodRef.current
+  return lod
 }
 
 function SceneContent({

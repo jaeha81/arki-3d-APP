@@ -61,6 +61,10 @@ function mergeBoxSegments(segments: BoxSegment[]): BufferGeometry {
     // 캐시에서 가져온 geo는 dispose하지 않음 — 공유 원본
     const sourceGeo = getCachedBoxGeo(w, h, d)
     const geo = sourceGeo.clone()
+    // 벽 방향 회전 먼저 적용 → 이후 월드 위치로 이동 (순서 중요)
+    if (seg.rotationY) {
+      geo.applyMatrix4(_mat4.makeRotationY(seg.rotationY))
+    }
     _mat4.makeTranslation(seg.position[0], seg.position[1], seg.position[2])
     geo.applyMatrix4(_mat4)
 
