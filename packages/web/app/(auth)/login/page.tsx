@@ -44,7 +44,7 @@ export default function LoginPage() {
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">
             <Box className="h-5 w-5 text-white" />
           </div>
-          <span className="text-lg font-bold tracking-tight">SpacePlanner</span>
+          <span className="text-lg font-bold tracking-tight">JH-3D</span>
         </div>
 
         {/* Tagline */}
@@ -68,7 +68,7 @@ export default function LoginPage() {
 
         {/* Footer quote */}
         <p className="relative text-xs text-white/30">
-          © 2026 SpacePlanner. 건축·인테리어 전문가를 위한 B2B SaaS
+          © 2026 JH-3D. 건축·인테리어 전문가를 위한 B2B SaaS
         </p>
       </div>
 
@@ -77,7 +77,7 @@ export default function LoginPage() {
         {/* Mobile logo */}
         <Link href="/" className="mb-8 flex items-center gap-2 lg:hidden">
           <Box className="h-6 w-6 text-[hsl(var(--primary))]" />
-          <span className="text-lg font-bold">SpacePlanner</span>
+          <span className="text-lg font-bold">JH-3D</span>
         </Link>
 
         <div className="w-full max-w-sm">

@@ -254,7 +254,7 @@ export default function PricingPage() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2">
             <Box className="h-6 w-6 text-[hsl(var(--primary))]" />
-            <span className="font-bold">SpacePlanner</span>
+            <span className="font-bold">JH-3D</span>
           </Link>
           <div className="flex items-center gap-3">
             <Link

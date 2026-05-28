@@ -12,7 +12,7 @@ export function DashboardHeader() {
         <div className="flex items-center gap-6">
           <Link href="/projects" className="flex items-center gap-2">
             <Box className="h-6 w-6 text-[hsl(var(--primary))]" />
-            <span className="text-lg font-bold">SpacePlanner</span>
+            <span className="text-lg font-bold">JH-3D</span>
           </Link>
           <nav className="hidden items-center gap-4 text-sm md:flex">
             <Link

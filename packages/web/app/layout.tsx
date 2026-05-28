@@ -4,7 +4,7 @@ import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import { QueryProvider } from '@/components/providers/QueryProvider'
 
 export const metadata: Metadata = {
-  title: 'SpacePlanner - Interior Design Platform',
+  title: 'JH-3D - Interior Design Platform',
   description: 'Create stunning interior designs with our intuitive 3D planning tool',
 }
 

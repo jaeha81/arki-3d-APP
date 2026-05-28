@@ -10,7 +10,7 @@ export default function Home() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2">
             <Box className="h-7 w-7 text-[hsl(var(--primary))]" />
-            <span className="text-xl font-bold tracking-tight">SpacePlanner</span>
+            <span className="text-xl font-bold tracking-tight">JH-3D</span>
           </div>
           <div className="flex items-center gap-3">
             <Link
@@ -389,7 +389,7 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
             <h2 className="text-3xl font-bold">실제 사용자의 이야기</h2>
-            <p className="mt-3 text-[hsl(var(--muted-foreground))]">SpacePlanner를 사용하는 전문가들의 후기</p>
+            <p className="mt-3 text-[hsl(var(--muted-foreground))]">JH-3D를 사용하는 전문가들의 후기</p>
           </div>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
             {[
@@ -400,7 +400,7 @@ export default function Home() {
                 initials: 'K',
               },
               {
-                quote: '인테리어 시안 작업을 SpacePlanner로 바꾸고 나서 고객 만족도가 올라갔습니다. 공간감을 직관적으로 전달할 수 있어요.',
+                quote: '인테리어 시안 작업을 JH-3D로 바꾸고 나서 고객 만족도가 올라갔습니다. 공간감을 직관적으로 전달할 수 있어요.',
                 name: '이디자인',
                 role: '수석 디자이너, 모던스페이스 인테리어',
                 initials: 'L',
@@ -466,7 +466,7 @@ export default function Home() {
           <div className="flex flex-col items-start justify-between gap-8 sm:flex-row sm:items-center">
             <div className="flex items-center gap-2">
               <Box className="h-6 w-6 text-[hsl(var(--primary))]" />
-              <span className="font-bold">SpacePlanner</span>
+              <span className="font-bold">JH-3D</span>
             </div>
             <div className="flex flex-wrap gap-6 text-sm text-[hsl(var(--muted-foreground))]">
               <Link href="/login" className="hover:text-[hsl(var(--foreground))]">로그인</Link>
@@ -477,7 +477,7 @@ export default function Home() {
             </div>
           </div>
           <div className="mt-8 text-center text-xs text-[hsl(var(--muted-foreground))]">
-            © 2026 SpacePlanner. All rights reserved. 결제: Toss Payments
+            © 2026 JH-3D. All rights reserved. 결제: Toss Payments
           </div>
         </div>
       </footer>

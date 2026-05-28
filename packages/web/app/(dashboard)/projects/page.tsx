@@ -30,7 +30,7 @@ function ProjectsContent() {
           <div>
             <h1 className="text-2xl font-bold">내 프로젝트</h1>
             <p className="text-sm text-[hsl(var(--muted-foreground))]">
-              SpacePlanner로 2D 도면과 3D 시각화를 동시에 작업하세요
+              JH-3D로 2D 도면과 3D 시각화를 동시에 작업하세요
             </p>
           </div>
           <Button onClick={() => setCreateOpen(true)}>
@@ -78,7 +78,7 @@ function ProjectsContent() {
           onDelete={id => deleteProject.mutate(id)}
           onCreateClick={() => setCreateOpen(true)}
           emptyTitle="첫 번째 프로젝트를 만들어보세요"
-          emptyDescription="SpacePlanner로 2D 도면과 3D 시각화를 동시에 작업하세요"
+          emptyDescription="JH-3D로 2D 도면과 3D 시각화를 동시에 작업하세요"
         />
       </main>
       <CreateProjectDialog open={createOpen} onOpenChange={setCreateOpen} />

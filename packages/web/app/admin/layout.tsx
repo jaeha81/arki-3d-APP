@@ -35,7 +35,7 @@ export default function AdminLayout({
       {/* Content */}
       <div className="flex-1">
         <header className="flex h-14 items-center border-b px-6">
-          <h1 className="text-lg font-semibold">SpacePlanner Admin</h1>
+          <h1 className="text-lg font-semibold">JH-3D Admin</h1>
         </header>
         <main className="p-6">{children}</main>
       </div>
