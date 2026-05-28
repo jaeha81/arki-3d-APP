@@ -33,7 +33,7 @@ export default function Home() {
       <section className="mx-auto max-w-7xl px-4 pb-24 pt-20 text-center sm:px-6 lg:px-8">
         <div className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--muted))] px-4 py-1.5 text-xs font-medium text-[hsl(var(--muted-foreground))] mb-6">
           <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--primary))]" />
-          건축·인테리어 사무소 전용 B2B SaaS
+          2D 도면 → 3D 시각화 → AI 견적 | 건축·인테리어 사무소 전용 B2B SaaS
         </div>
         <h1 className="mx-auto max-w-4xl text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
           3D 도면 설계의{' '}
@@ -254,34 +254,50 @@ export default function Home() {
       <section className="py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
-            <h2 className="text-3xl font-bold">3단계로 시작하세요</h2>
-            <p className="mt-3 text-[hsl(var(--muted-foreground))]">복잡한 설정 없이 바로 설계 작업을 시작할 수 있습니다</p>
+            <h2 className="text-3xl font-bold">5단계 완성 워크플로우</h2>
+            <p className="mt-3 text-[hsl(var(--muted-foreground))]">2D 도면 → 3D 시각화 → AI 디자인 → 견적 → 클라이언트 공유까지 한 번에</p>
           </div>
-          <div className="relative grid grid-cols-1 gap-8 sm:grid-cols-3">
+          <div className="relative grid grid-cols-1 gap-8 sm:grid-cols-5">
             {[
               {
                 step: '01',
-                title: '프로젝트 생성',
-                desc: '프로젝트 이름과 기본 정보를 입력하고 새 프로젝트를 만드세요. 30초면 충분합니다.',
+                icon: '📐',
+                title: '2D 도면 작성',
+                desc: '벽·문·창문을 캔버스에 배치. 스냅·치수선 자동 적용.',
               },
               {
                 step: '02',
-                title: '2D 도면 작성',
-                desc: '직관적인 캔버스에서 벽, 문, 창문을 배치하고 공간을 설계하세요.',
+                icon: '🧊',
+                title: '실시간 3D 변환',
+                desc: '도면 그리는 즉시 3D로 자동 변환. 회전·줌으로 공간감 확인.',
               },
               {
                 step: '03',
-                title: '3D 뷰 확인',
-                desc: '자동으로 생성된 3D 공간을 회전하고 가구를 배치하여 완성도를 높이세요.',
+                icon: '🤖',
+                title: 'AI 디자인 제안',
+                desc: '"모던하게 꾸며줘" 한 마디로 가구 자동 배치 + 컨셉 제안.',
+              },
+              {
+                step: '04',
+                icon: '🧾',
+                title: '자동 견적 생성',
+                desc: '자재·시공비 한국 단가 기준 자동 산출. PDF 견적서 즉시 출력.',
+              },
+              {
+                step: '05',
+                icon: '🔗',
+                title: '클라이언트 공유',
+                desc: '링크 한 번으로 3D 도면·견적 공유. 수주율이 올라갑니다.',
               },
             ].map((item, i) => (
               <div key={item.step} className="relative flex flex-col items-center text-center">
-                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-lg font-bold text-white shadow-lg">
-                  {item.step}
+                <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-xl shadow-lg">
+                  {item.icon}
                 </div>
-                {i < 2 && (
+                {i < 4 && (
                   <div className="absolute left-[calc(50%+28px)] top-7 hidden h-0.5 w-[calc(100%-56px)] bg-[hsl(var(--border))] sm:block" />
                 )}
+                <div className="mb-1 text-xs font-bold text-[hsl(var(--primary))]">{item.step}</div>
                 <h3 className="mb-2 font-semibold">{item.title}</h3>
                 <p className="text-sm leading-relaxed text-[hsl(var(--muted-foreground))]">{item.desc}</p>
               </div>
