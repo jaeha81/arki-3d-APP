@@ -1,5 +1,7 @@
 # Dependencies
 node_modules/
+node_modules.zip
+*.zip
 .pnp
 .pnp.js
 
