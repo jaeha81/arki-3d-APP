@@ -4,8 +4,8 @@
   "outputDirectory": "packages/web/.next",
   "installCommand": "npm install --legacy-peer-deps",
   "env": {
-    "NEXT_PUBLIC_API_URL": "https://arki3d-api.onrender.com/api/v1",
-    "NEXT_PUBLIC_APP_URL": "https://arki-3d.vercel.app"
+    "NEXT_PUBLIC_API_URL": "https://arki3d-api.onrender.com",
+    "NEXT_PUBLIC_APP_URL": "https://arki-3d-app.vercel.app"
   },
   "headers": [
     {
