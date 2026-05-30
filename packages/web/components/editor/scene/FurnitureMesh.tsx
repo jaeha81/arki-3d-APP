@@ -153,6 +153,7 @@ interface InstancedFurnitureGroupProps {
   items: FurniturePlacement3D[]
   selectedId?: string | null
   onSelect?: (id: string) => void
+  lod?: LodLevel
 }
 
 const _mat4 = new Matrix4()
@@ -162,6 +163,7 @@ export function InstancedFurnitureGroup({
   items,
   selectedId,
   onSelect,
+  lod = 'high',
 }: InstancedFurnitureGroupProps) {
   const meshRef = useRef<InstancedMesh>(null)
 
@@ -170,6 +172,14 @@ export function InstancedFurnitureGroup({
     () => new MeshStandardMaterial({ color: '#a0a0a0', vertexColors: true }),
     []
   )
+
+  // Dispose GPU resources on unmount
+  useEffect(() => {
+    return () => {
+      geo.dispose()
+      mat.dispose()
+    }
+  }, [geo, mat])
 
   // 인스턴스 행렬 + 색상 초기화
   useEffect(() => {
@@ -204,8 +214,9 @@ export function InstancedFurnitureGroup({
     <instancedMesh
       ref={meshRef as any}
       args={[geo as any, mat as any, items.length]}
-      castShadow
+      castShadow={lod !== 'low'}
       receiveShadow
+      frustumCulled={false}
       onClick={handleClick}
     />
   )

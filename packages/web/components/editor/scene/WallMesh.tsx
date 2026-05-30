@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, useRef } from 'react'
+import { useMemo, useState, useRef, useEffect } from 'react'
 import {
   MeshStandardMaterial,
   BufferGeometry,
@@ -110,11 +110,18 @@ function MergedWallSegments({
   onClick?: () => void
   lod: LodLevel
 }) {
-  const mergedGeo = useMemo<BufferGeometry>(
-    () => mergeBoxSegments(segments),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [segments]
-  )
+  const geoRef = useRef<BufferGeometry | null>(null)
+  const mergedGeo = useMemo<BufferGeometry>(() => {
+    geoRef.current?.dispose()
+    const g = mergeBoxSegments(segments)
+    geoRef.current = g
+    return g
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [segments])
+
+  useEffect(() => {
+    return () => { geoRef.current?.dispose() }
+  }, [])
 
   const [hovered, setHovered] = useState(false)
   const meshRef = useRef<Mesh>(null)

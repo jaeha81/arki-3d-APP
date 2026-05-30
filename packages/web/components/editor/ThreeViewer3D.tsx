@@ -188,6 +188,7 @@ function SceneContent({
         items={sceneData.furniture}
         selectedId={selectedId}
         onSelect={onSelect ?? undefined}
+        lod={lod}
       />
     </>
   )

@@ -74,11 +74,32 @@ body {
   to { opacity: 1; }
 }
 
+/* SVG 평면도 path-draw 애니메이션 */
+@keyframes path-draw {
+  from { stroke-dashoffset: var(--path-len, 2000); }
+  to   { stroke-dashoffset: 0; }
+}
+
+@keyframes path-fill-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
 .animate-fade-up { animation: fade-up 0.5s ease-out both; }
 .animate-fade-in { animation: fade-in 0.4s ease-out both; }
+.animate-path-draw {
+  stroke-dasharray: var(--path-len, 2000);
+  stroke-dashoffset: var(--path-len, 2000);
+  animation: path-draw 1.8s ease-out both;
+}
+.animate-path-fill { animation: path-fill-in 0.6s ease-out both; }
 .animation-delay-100 { animation-delay: 100ms; }
 .animation-delay-200 { animation-delay: 200ms; }
 .animation-delay-300 { animation-delay: 300ms; }
+.animation-delay-500 { animation-delay: 500ms; }
+.animation-delay-800 { animation-delay: 800ms; }
+.animation-delay-1200 { animation-delay: 1200ms; }
+.animation-delay-1600 { animation-delay: 1600ms; }
 
 :focus-visible {
   outline: 2px solid hsl(var(--ring));
